@@ -1,0 +1,11 @@
+{
+  "hero": "",
+  "items": [
+    {"t":"Dawn Ridge","c":"landscape","img":"","g":["#1f3a4d","#e0a96d"],"r":"4/5","loc":"Blue Mountains, NSW","date":"June 2026","cam":"Sony A7 IV · 24–70mm","set":"f/8 · 1/250s · ISO 100","story":"Placeholder: write the story behind this photo here."},
+    {"t":"Crossing","c":"street","img":"","g":["#2a2a2e","#b9573a"],"r":"3/2","loc":"Haymarket, Sydney","date":"March 2026"},
+    {"t":"Still Gaze","c":"portrait","img":"","g":["#4a3b34","#d9bfa6"],"r":"4/5"},
+    {"t":"Glass Tower","c":"architecture","img":"","g":["#14263a","#8fb4cf"],"r":"3/4"},
+    {"t":"Salt Flats","c":"landscape","img":"","g":["#c9b79c","#f1e8d6"],"r":"3/2"},
+    {"t":"Neon Rain","c":"street","img":"","g":["#1b1030","#e2488f"],"r":"4/5"}
+  ]
+}
