@@ -18,8 +18,8 @@ create policy "Owner can insert portfolio" on public.portfolio
 
 create policy "Owner can update portfolio" on public.portfolio
   for update to authenticated
-  using ((auth.jwt() ->> 'email') = 'YOUR_EMAIL@example.com')
-  with check ((auth.jwt() ->> 'email') = 'YOUR_EMAIL@example.com');
+  using ((auth.jwt() ->> 'email') = 'lewis.eom31@gmail.com')
+  with check ((auth.jwt() ->> 'email') = 'lewis.eom31@gmail.com');
 
 -- Photo storage (public bucket so visitors can see images)
 insert into storage.buckets (id, name, public)
@@ -28,12 +28,12 @@ on conflict (id) do nothing;
 
 create policy "Owner can upload photos" on storage.objects
   for insert to authenticated
-  with check (bucket_id = 'photos' and (auth.jwt() ->> 'email') = 'YOUR_EMAIL@example.com');
+  with check (bucket_id = 'photos' and (auth.jwt() ->> 'email') = 'lewis.eom31@gmail.com');
 
 create policy "Owner can update photos" on storage.objects
   for update to authenticated
-  using (bucket_id = 'photos' and (auth.jwt() ->> 'email') = 'YOUR_EMAIL@example.com');
+  using (bucket_id = 'photos' and (auth.jwt() ->> 'email') = 'lewis.eom31@gmail.com');
 
 create policy "Owner can delete photos" on storage.objects
   for delete to authenticated
-  using (bucket_id = 'photos' and (auth.jwt() ->> 'email') = 'YOUR_EMAIL@example.com');
+  using (bucket_id = 'photos' and (auth.jwt() ->> 'email') = 'lewis.eom31@gmail.com');
