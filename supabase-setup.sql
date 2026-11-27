@@ -1,7 +1,8 @@
--- Run this once in Supabase: SQL Editor > New query > paste > Run.
--- STEP 1: replace YOUR_EMAIL@example.com (3 places below use it) with the email of the owner account you will create.
+-- Run in Supabase: SQL Editor > New query > paste > Run.
+-- Safe to run more than once.
+-- BEFORE RUNNING: replace YOUR_EMAIL@example.com with your login email (Find & Replace, all occurrences).
 
--- Content table (one row holding all site content)
+-- 1. Content table
 create table if not exists public.portfolio (
   id int primary key,
   data jsonb not null default '{}'::jsonb,
@@ -9,22 +10,30 @@ create table if not exists public.portfolio (
 );
 alter table public.portfolio enable row level security;
 
+drop policy if exists "Anyone can read portfolio" on public.portfolio;
+drop policy if exists "Owner can insert portfolio" on public.portfolio;
+drop policy if exists "Owner can update portfolio" on public.portfolio;
+
 create policy "Anyone can read portfolio" on public.portfolio
   for select using (true);
 
 create policy "Owner can insert portfolio" on public.portfolio
   for insert to authenticated
-  with check ((auth.jwt() ->> 'email') = 'YOUR_EMAIL@example.com');
+  with check ((auth.jwt() ->> 'email') = 'lewis.eom31@gmail.com');
 
 create policy "Owner can update portfolio" on public.portfolio
   for update to authenticated
   using ((auth.jwt() ->> 'email') = 'lewis.eom31@gmail.com')
   with check ((auth.jwt() ->> 'email') = 'lewis.eom31@gmail.com');
 
--- Photo storage (public bucket so visitors can see images)
+-- 2. Photo storage bucket (public so visitors can see images)
 insert into storage.buckets (id, name, public)
 values ('photos', 'photos', true)
-on conflict (id) do nothing;
+on conflict (id) do update set public = true;
+
+drop policy if exists "Owner can upload photos" on storage.objects;
+drop policy if exists "Owner can update photos" on storage.objects;
+drop policy if exists "Owner can delete photos" on storage.objects;
 
 create policy "Owner can upload photos" on storage.objects
   for insert to authenticated
