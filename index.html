@@ -69,18 +69,36 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;paddin
 @media(max-width:800px){.grid{columns:2;column-gap:12px}.tile{margin-bottom:12px}.intro,.contact{grid-template-columns:1fr}nav{gap:1rem}nav a{font-size:10px}.logo{font-size:18px!important}}
 .tile img.ph{display:block;object-fit:cover}
 .tile .ph[role=img]{display:block}
+.bar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:40;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;background:var(--fg);color:var(--bg);padding:10px 14px;border-radius:40px;font-size:12px;box-shadow:0 8px 30px rgba(0,0,0,.3);max-width:94vw}
+.bar button,.b{background:none;border:1px solid currentColor;color:inherit;border-radius:20px;padding:6px 14px;font:inherit;font-size:12px;cursor:pointer}
+.bar button.pri{background:var(--bg);color:var(--fg);border-color:var(--bg)}
+body.editing [data-k]{outline:1px dashed var(--mute);outline-offset:4px;cursor:text}
+.ctl{display:none;position:absolute;top:8px;left:8px;right:8px;z-index:3;gap:6px;flex-wrap:wrap}
+body.editing .ctl{display:flex}
+.ctl button{background:rgba(0,0,0,.72);color:#fff;border:0;border-radius:14px;padding:5px 10px;font-size:11px;cursor:pointer}
+body.editing .tile{cursor:default}
+.ed{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:4vw}
+.ed.open{display:flex}
+.edin{background:var(--bg);color:var(--fg);padding:28px;max-width:520px;width:100%;max-height:90vh;overflow:auto}
+.edin label{display:block;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--mute);margin-top:10px}
+.edin input,.edin textarea,.edin select{margin-bottom:0;font-size:14px;letter-spacing:0;text-transform:none}
+.edin select{width:100%;background:none;color:var(--fg);border:0;border-bottom:1px solid var(--line);padding:12px 0}
+.edin option{background:var(--bg)}
+.edin .b{color:var(--fg)}
+.edin a{text-decoration:underline}
+.edin input[type=password]{letter-spacing:.1em}
 </style>
 </head>
 <body>
 <header>
-  <a href="#top" class="logo serif">Kennie</a>
+  <a href="#top" class="logo serif" data-k="logo">Kennie</a>
   <nav><a href="#work">Work</a><a href="#about">About</a><a href="#contact">Contact</a></nav>
 </header>
 
 <div class="hero" id="top">
   <div>
-    <h1 class="serif">Light, patience &amp; quiet places.</h1>
-    <p>Photography · Sydney, Australia</p>
+    <h1 class="serif" data-k="heroTitle">Light, patience &amp; quiet places.</h1>
+    <p data-k="heroSub">Photography · Sydney, Australia</p>
   </div>
 </div>
 
@@ -89,10 +107,10 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;paddin
 <section class="intro" id="about">
   <div class="rev">
     <div class="label">Identity</div>
-    <h2 class="serif">A visual practice where observation meets craft, drawing original and recognisable frames.</h2>
+    <h2 class="serif" data-k="introTitle">A visual practice where observation meets craft, drawing original and recognisable frames.</h2>
   </div>
   <div class="rev">
-    <p>Replace this paragraph with a short introduction to your photography: what you shoot, how you see, and what you want viewers to feel. Two or three sentences is plenty.</p>
+    <p data-k="introText">Replace this paragraph with a short introduction to your photography: what you shoot, how you see, and what you want viewers to feel. Two or three sentences is plenty.</p>
     <a href="#work" class="btn">View portfolio</a>
   </div>
 </section>
@@ -105,14 +123,14 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;paddin
 
 <section class="quote">
   <div class="label">Philosophy</div>
-  <p class="serif rev">Great photographs are not found by chance. They are built, patiently, frame by frame.</p>
+  <p class="serif rev" data-k="quote">Great photographs are not found by chance. They are built, patiently, frame by frame.</p>
 </section>
 
 <section class="contact" id="contact">
   <div class="rev">
     <div class="label">Contact</div>
-    <h2 class="serif">Let’s make something worth looking at.</h2>
-    <p style="margin-top:1.5rem;color:var(--mute);white-space:pre-line">hello@yourname.com
+    <h2 class="serif" data-k="contactTitle">Let’s make something worth looking at.</h2>
+    <p data-k="contactText" style="margin-top:1.5rem;color:var(--mute);white-space:pre-line">hello@yourname.com
 Sydney, NSW</p>
   </div>
   <div class="rev">
@@ -121,24 +139,36 @@ Sydney, NSW</p>
   </div>
 </section>
 
-<footer><span>© 2026 Kennie Photography</span><span>Instagram · Behance · LinkedIn</span><a href="#top" style="color:inherit;text-decoration:none">Back to top ↑</a></footer>
+<footer><span data-k="footer">© 2026 Kennie Photography</span><span>Instagram · Behance · LinkedIn</span><a href="#top" style="color:inherit;text-decoration:none">Back to top ↑</a></footer>
 
 <div class="lb" id="lb" aria-modal="true" role="dialog">
   <button class="x" aria-label="Close">×</button><button class="pv" aria-label="Previous">‹</button><button class="nx" aria-label="Next">›</button>
   <div class="lbin"><div class="ph" id="lbph"></div><div class="info" id="lbinfo"></div></div>
 </div>
 <script>
+/* Paste your Supabase project values here (Project Settings > API). The anon key is safe to publish; never use the service_role key. */
+window.SUPABASE_URL = 'YOUR_SUPABASE_URL';
+window.SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
 (function () {
   'use strict';
   var $ = function (i) { return document.getElementById(i); };
-  var g = $('grid'), lb = $('lb'), items = [], flt = 'all', cur = 0, vis = [];
+  var g = $('grid'), lb = $('lb'), D = { hero: '', t: {}, items: [] };
+  var flt = 'all', cur = 0, vis = [], edit = false, dirty = false, pend = [], local = {}, sha = null, A = null, ei = -1;
+  var FALLBACK = {"hero":"","items":[
+    {"t":"Dawn Ridge","c":"landscape","g":["#1f3a4d","#e0a96d"],"r":"4/5","loc":"Blue Mountains, NSW","date":"June 2026","cam":"Sony A7 IV · 24–70mm","set":"f/8 · 1/250s · ISO 100","story":"Placeholder: write the story behind this photo here."},
+    {"t":"Crossing","c":"street","g":["#2a2a2e","#b9573a"],"r":"3/2"},
+    {"t":"Still Gaze","c":"portrait","g":["#4a3b34","#d9bfa6"],"r":"4/5"},
+    {"t":"Glass Tower","c":"architecture","g":["#14263a","#8fb4cf"],"r":"3/4"},
+    {"t":"Salt Flats","c":"landscape","g":["#c9b79c","#f1e8d6"],"r":"3/2"},
+    {"t":"Neon Rain","c":"street","g":["#1b1030","#e2488f"],"r":"4/5"}]};
 
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
+  /* ---------- helpers ---------- */
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function url(p) {
+    if (/^https?:\/\//.test(p)) return String(p).replace(/'/g, '%27').replace(/"/g, '%22').replace(/\(/g, '%28').replace(/\)/g, '%29');
     return encodeURI(String(p)).replace(/'/g, '%27').replace(/"/g, '%22').replace(/\(/g, '%28').replace(/\)/g, '%29');
   }
   function bg(it) {
@@ -146,31 +176,38 @@ Sydney, NSW</p>
     var c = it.g || ['#333', '#999'];
     return 'radial-gradient(ellipse at 30% 25%,' + c[1] + ',' + c[0] + ' 75%)';
   }
+  function say(m) { var s = $('st'); if (s) s.textContent = m || ''; }
+  function mark() { dirty = true; say('Unsaved changes'); }
 
+  /* ---------- public site ---------- */
+  function applyTexts() {
+    document.querySelectorAll('[data-k]').forEach(function (e) { var v = D.t[e.dataset.k]; if (v != null && v !== '') e.textContent = v; });
+  }
+  function hero() {
+    $('top').style.background = D.hero ? 'linear-gradient(rgba(0,0,0,.3),rgba(0,0,0,.3)),' + bg({ img: D.hero }) : '';
+  }
   function draw() {
     g.innerHTML = '';
-    items.forEach(function (it, i) {
+    D.items.forEach(function (it, i) {
       var f = document.createElement('figure');
-      f.className = 'tile rev in';
-      f.dataset.c = it.c || '';
-      f.dataset.i = i;
+      f.className = 'tile rev in'; f.dataset.c = it.c || ''; f.dataset.i = i;
       var ratio = esc(it.r || '3/2');
       f.innerHTML = (it.img
         ? '<img class="ph" loading="lazy" decoding="async" src="' + esc(url(it.img)) + '" alt="' + esc(it.alt || it.t) + '" style="aspect-ratio:' + ratio + '">'
         : '<div class="ph" role="img" aria-label="' + esc(it.t) + '" style="aspect-ratio:' + ratio + ';background:' + bg(it) + '"></div>')
-        + '<figcaption>' + esc(it.t) + (it.c ? ' — ' + esc(it.c) : '') + '</figcaption>';
+        + '<figcaption>' + esc(it.t) + (it.c ? ' — ' + esc(it.c) : '') + '</figcaption>'
+        + '<div class="ctl"><button data-a="img">Photo</button><button data-a="ed">Details</button><button data-a="l">←</button><button data-a="r">→</button><button data-a="del">Delete</button></div>';
       var im = f.querySelector('img');
       if (im && !it.r) im.onload = function () { it.r = im.naturalWidth + '/' + im.naturalHeight; im.style.aspectRatio = it.r; };
       f.classList.toggle('hide', flt !== 'all' && it.c !== flt);
       g.appendChild(f);
     });
   }
-
   function buildFilters() {
     var cats = [];
-    items.forEach(function (it) { if (it.c && cats.indexOf(it.c) < 0) cats.push(it.c); });
+    D.items.forEach(function (it) { if (it.c && cats.indexOf(it.c) < 0) cats.push(it.c); });
     $('filters').innerHTML = ['all'].concat(cats).map(function (c) {
-      return '<button data-f="' + esc(c) + '"' + (c === 'all' ? ' class="on"' : '') + '>' + (c === 'all' ? 'All' : esc(c)) + '</button>';
+      return '<button data-f="' + esc(c) + '"' + (c === flt ? ' class="on"' : '') + '>' + (c === 'all' ? 'All' : esc(c)) + '</button>';
     }).join('');
   }
   $('filters').onclick = function (e) {
@@ -179,26 +216,17 @@ Sydney, NSW</p>
     b.classList.add('on'); flt = b.dataset.f;
     [].forEach.call(g.children, function (t) { t.classList.toggle('hide', flt !== 'all' && t.dataset.c !== flt); });
   };
-
   function visible() { return [].slice.call(g.children).filter(function (t) { return !t.classList.contains('hide'); }); }
   function show(n) {
     vis = visible(); if (!vis.length) return;
     cur = (n + vis.length) % vis.length;
-    var it = items[+vis[cur].dataset.i], p = $('lbph'), a = String(it.r || '3/2').split('/');
-    p.style.background = bg(it);
-    p.style.setProperty('--ar', it.r || '3/2');
-    p.style.setProperty('--r', a[0] / (a[1] || 1));
-    var rows = [['Location', it.loc], ['Date', it.date], ['Camera', it.cam], ['Settings', it.set]]
-      .filter(function (r) { return r[1]; })
+    var it = D.items[+vis[cur].dataset.i], p = $('lbph'), a = String(it.r || '3/2').split('/');
+    p.style.background = bg(it); p.style.setProperty('--ar', it.r || '3/2'); p.style.setProperty('--r', a[0] / (a[1] || 1));
+    var rows = [['Location', it.loc], ['Date', it.date], ['Camera', it.cam], ['Settings', it.set]].filter(function (r) { return r[1]; })
       .map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd>'; }).join('');
     $('lbinfo').innerHTML = (it.c ? '<div class="cat">' + esc(it.c) + '</div>' : '') + '<h3>' + esc(it.t) + '</h3>'
-      + (rows ? '<dl>' + rows + '</dl>' : '')
-      + (it.story ? '<p>' + esc(it.story).replace(/\n/g, '<br>') + '</p>' : '');
+      + (rows ? '<dl>' + rows + '</dl>' : '') + (it.story ? '<p>' + esc(it.story).replace(/\n/g, '<br>') + '</p>' : '');
   }
-  g.onclick = function (e) {
-    var t = e.target.closest('.tile'); if (!t) return;
-    show(visible().indexOf(t)); lb.classList.add('open');
-  };
   lb.onclick = function (e) {
     if (e.target.classList.contains('nx')) show(cur + 1);
     else if (e.target.classList.contains('pv')) show(cur - 1);
@@ -210,29 +238,145 @@ Sydney, NSW</p>
     if (e.key === 'ArrowRight') show(cur + 1);
     if (e.key === 'ArrowLeft') show(cur - 1);
   });
-
-  var io = new IntersectionObserver(function (es) {
-    es.forEach(function (x) { if (x.isIntersecting) { x.target.classList.add('in'); io.unobserve(x.target); } });
-  }, { threshold: .12 });
+  var io = new IntersectionObserver(function (es) { es.forEach(function (x) { if (x.isIntersecting) { x.target.classList.add('in'); io.unobserve(x.target); } }); }, { threshold: .12 });
   document.querySelectorAll('.rev').forEach(function (el) { io.observe(el); });
+  function init(d) { D = d; D.t = D.t || {}; D.items = D.items || []; applyTexts(); hero(); buildFilters(); draw(); }
 
-  var FALLBACK = {
-  "hero": "",
-  "items": [
-    {"t":"Dawn Ridge","c":"landscape","img":"","g":["#1f3a4d","#e0a96d"],"r":"4/5","loc":"Blue Mountains, NSW","date":"June 2026","cam":"Sony A7 IV · 24–70mm","set":"f/8 · 1/250s · ISO 100","story":"Placeholder: write the story behind this photo here."},
-    {"t":"Crossing","c":"street","img":"","g":["#2a2a2e","#b9573a"],"r":"3/2","loc":"Haymarket, Sydney","date":"March 2026"},
-    {"t":"Still Gaze","c":"portrait","img":"","g":["#4a3b34","#d9bfa6"],"r":"4/5"},
-    {"t":"Glass Tower","c":"architecture","img":"","g":["#14263a","#8fb4cf"],"r":"3/4"},
-    {"t":"Salt Flats","c":"landscape","img":"","g":["#c9b79c","#f1e8d6"],"r":"3/2"},
-    {"t":"Neon Rain","c":"street","img":"","g":["#1b1030","#e2488f"],"r":"4/5"}
-  ]
-};
-  function init(d) {
-    items = d.items || [];
-    if (d.hero) $('top').style.background = 'linear-gradient(rgba(0,0,0,.3),rgba(0,0,0,.3)),' + bg({ img: d.hero });
-    buildFilters(); draw();
+  /* ---------- Supabase ---------- */
+  var sb = (window.supabase && /^https:\/\//.test(window.SUPABASE_URL || '')) ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY) : null;
+  async function loadRemote() {
+    if (!sb) { init(FALLBACK); return; }
+    try {
+      var r = await sb.from('portfolio').select('data').eq('id', 1).maybeSingle();
+      if (r.error) throw r.error;
+      init(r.data && r.data.data && r.data.data.items ? r.data.data : FALLBACK);
+    } catch (e) { init(FALLBACK); }
   }
-  fetch('data.json').then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(init).catch(function () { init(FALLBACK); });
+  async function save() {
+    say('Saving…');
+    try {
+      var r = await sb.from('portfolio').upsert({ id: 1, data: D });
+      if (r.error) throw r.error;
+      dirty = false; say('Saved. Your changes are live.');
+    } catch (e) { say('Save failed: ' + (e.message || e)); }
+  }
+
+  /* ---------- images ---------- */
+  function shrink(file) {
+    return new Promise(function (res, rej) {
+      var im = new Image(), u = URL.createObjectURL(file);
+      im.onload = function () {
+        var s = Math.min(1, 2200 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+        c.width = Math.round(im.width * s); c.height = Math.round(im.height * s);
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        c.toBlob(function (b) { URL.revokeObjectURL(u); b ? res({ blob: b, w: c.width, h: c.height }) : rej(new Error('Could not read image')); }, 'image/jpeg', .88);
+      };
+      im.onerror = function () { rej(new Error('Not a supported image')); }; im.src = u;
+    });
+  }
+  async function prep(file) {
+    var s = await shrink(file);
+    var slug = file.name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'photo';
+    var path = slug + '-' + Date.now().toString(36) + '.jpg';
+    var up = await sb.storage.from('photos').upload(path, s.blob, { contentType: 'image/jpeg', cacheControl: '31536000' });
+    if (up.error) throw up.error;
+    return { url: sb.storage.from('photos').getPublicUrl(path).data.publicUrl, ar: s.w + '/' + s.h };
+  }
+  function pick(multi, cb) {
+    var f = document.createElement('input'); f.type = 'file'; f.accept = 'image/*'; f.multiple = !!multi;
+    f.onchange = async function () {
+      for (var k = 0; k < f.files.length; k++) {
+        try { say('Preparing ' + (k + 1) + ' of ' + f.files.length + '…'); cb(await prep(f.files[k]), f.files[k]); }
+        catch (e) { say('Failed: ' + e.message); return; }
+      }
+      say(dirty ? 'Unsaved changes' : '');
+    };
+    f.click();
+  }
+
+  /* ---------- editing UI ---------- */
+  function modal(html) { var m = document.createElement('div'); m.className = 'ed'; m.innerHTML = '<div class="edin">' + html + '</div>'; document.body.appendChild(m); return m; }
+  var FL = [['t', 'Title'], ['c', 'Category'], ['loc', 'Location'], ['date', 'Date'], ['cam', 'Camera'], ['set', 'Settings'], ['story', 'Story / background']];
+  var ed = modal('<h4 class="serif" style="font-size:30px;font-weight:300">Photo details</h4>' + FL.map(function (f) {
+    var k = f[0];
+    return '<label>' + f[1] + (k === 'c' ? '<input data-f="c" list="cats" autocomplete="off"><datalist id="cats"><option>landscape</option><option>street</option><option>portrait</option><option>architecture</option></datalist>'
+      : k === 'story' ? '<textarea rows="6" data-f="story"></textarea>' : '<input data-f="' + k + '">') + '</label>';
+  }).join('') + '<div style="margin-top:20px;display:flex;gap:10px"><button class="b" data-x="ok">Apply</button><button class="b" data-x="no">Cancel</button></div>');
+  function openEd(i) { ei = i; ed.querySelectorAll('[data-f]').forEach(function (el) { el.value = D.items[i][el.dataset.f] || ''; }); ed.classList.add('open'); }
+  ed.onclick = function (e) {
+    var x = e.target.dataset.x;
+    if (x === 'ok') { ed.querySelectorAll('[data-f]').forEach(function (el) { D.items[ei][el.dataset.f] = el.value.trim(); }); mark(); buildFilters(); draw(); ed.classList.remove('open'); }
+    else if (x === 'no' || e.target === ed) ed.classList.remove('open');
+  };
+
+  var lg = modal('<h4 class="serif" style="font-size:30px;font-weight:300">Owner sign in</h4>'
+    + '<label>Email<input id="a_em" type="email" autocomplete="username"></label><label>Password<input id="a_pw" type="password" autocomplete="current-password"></label>'
+    + '<p id="a_err" style="color:#c0463a;font-size:13px;margin-top:10px"></p>'
+    + '<div style="margin-top:14px;display:flex;gap:10px"><button class="b" data-x="go">Sign in</button><button class="b" data-x="no">Cancel</button></div>');
+  lg.onclick = async function (e) {
+    var x = e.target.dataset.x;
+    if (x === 'no' || e.target === lg) { lg.classList.remove('open'); return; }
+    if (x !== 'go') return;
+    $('a_err').textContent = 'Signing in…';
+    var r = await sb.auth.signInWithPassword({ email: $('a_em').value.trim(), password: $('a_pw').value });
+    if (r.error) { $('a_err').textContent = r.error.message; return; }
+    $('a_pw').value = ''; $('a_err').textContent = ''; lg.classList.remove('open'); B.style.display = 'flex'; setEdit(true);
+  };
+  lg.addEventListener('keydown', function (e) { if (e.key === 'Enter' && lg.classList.contains('open')) lg.querySelector('[data-x=go]').click(); });
+  function openLogin() {
+    if (!sb) { alert('Add your Supabase URL and anon key at the top of index.html first.'); return; }
+    $('a_err').textContent = ''; lg.classList.add('open');
+  }
+
+  function act(b, i) {
+    var a = b.dataset.a, it = D.items[i], j;
+    if (a === 'img') pick(false, function (r) { it.img = r.url; it.r = r.ar; mark(); draw(); });
+    else if (a === 'ed') openEd(i);
+    else if (a === 'l' || a === 'r') { j = a === 'l' ? i - 1 : i + 1; if (j < 0 || j >= D.items.length) return; D.items[i] = D.items[j]; D.items[j] = it; mark(); draw(); }
+    else if (a === 'del') {
+      if (b.dataset.s) { D.items.splice(i, 1); mark(); buildFilters(); draw(); }
+      else { b.dataset.s = 1; b.textContent = 'Sure?'; setTimeout(function () { b.dataset.s = ''; b.textContent = 'Delete'; }, 2500); }
+    }
+  }
+  g.onclick = function (e) {
+    var t = e.target.closest('.tile'); if (!t) return;
+    if (edit) { var b = e.target.closest('button'); if (b) act(b, +t.dataset.i); return; }
+    show(visible().indexOf(t)); lb.classList.add('open');
+  };
+  document.addEventListener('input', function (e) { var k = edit && e.target.dataset && e.target.dataset.k; if (k) { D.t[k] = e.target.innerText; mark(); } });
+  document.addEventListener('click', function (e) { if (edit && e.target.closest('a[data-k]')) e.preventDefault(); }, true);
+
+  var B = document.createElement('div'); B.className = 'bar'; B.style.display = 'none'; document.body.appendChild(B);
+  function bar() {
+    B.innerHTML = (edit ? '<button data-b="add">+ Add photos</button><button data-b="hero">Hero image</button><button class="pri" data-b="save">Save to GitHub</button><button data-b="exit">Done</button>'
+      : '<button data-b="on">✎ Edit site' + (dirty ? ' · unsaved' : '') + '</button>') + '<button data-b="out">Sign out</button><span id="st"></span>';
+    if (edit && dirty) say('Unsaved changes');
+  }
+  function setEdit(v) {
+    edit = v; document.body.classList.toggle('editing', v);
+    document.querySelectorAll('[data-k]').forEach(function (e) { if (v) e.setAttribute('contenteditable', 'true'); else e.removeAttribute('contenteditable'); });
+    bar();
+  }
+  B.onclick = function (e) {
+    var b = e.target.closest('button'); if (!b) return; var k = b.dataset.b;
+    if (k === 'on') setEdit(true); else if (k === 'exit') setEdit(false);
+    else if (k === 'add') pick(true, function (r, f) { D.items.push({ t: f.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '), c: flt === 'all' ? 'landscape' : flt, img: r.url, r: r.ar }); mark(); buildFilters(); draw(); });
+    else if (k === 'hero') pick(false, function (r) { D.hero = r.url; mark(); hero(); });
+    else if (k === 'save') save();
+    else if (k === 'out') { dirty = false; sb.auth.signOut().then(function () { location.reload(); }); }
+  };
+  window.addEventListener('beforeunload', function (e) { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+  var fo = document.querySelector('footer'), ad = document.createElement('a');
+  ad.href = '#'; ad.textContent = 'Admin'; ad.style.cssText = 'color:inherit;text-decoration:none;opacity:.5';
+  ad.onclick = function (e) {
+    e.preventDefault();
+    if (!sb) { openLogin(); return; }
+    sb.auth.getSession().then(function (r) { if (r.data.session) { B.style.display = 'flex'; setEdit(true); } else openLogin(); });
+  };
+  fo.appendChild(ad); bar();
+  loadRemote();
+  if (sb) sb.auth.getSession().then(function (r) { if (r.data.session) B.style.display = 'flex'; });
 })();
 </script>
 </body>
