@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Kennie — Photography</title>
 <meta name="description" content="Photography portfolio: landscape, street, portrait and architecture.">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;500&display=swap">
+<meta property="og:title" content="Kennie — Photography"><meta property="og:description" content="Photography portfolio: landscape, street, portrait and architecture."><meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📷%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@200;300;400;500&display=swap">
 <style>
 :root{--bg:#0b0b0a;--fg:#ece8df;--mute:#8a867d;--line:#26241f;--card:#151412;--ac:#e8b86a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 :root[data-theme="light"]{--bg:#f4f1ec;--fg:#1a1a18;--mute:#6f6b63;--line:#d9d4ca;--card:#e8e3d9;--ac:#b4741f}
@@ -114,6 +116,33 @@ body::after{content:"";position:fixed;inset:-50%;width:200%;height:200%;pointer-
 .ld span{animation:ldin 1.3s both}.ld.off{opacity:0;visibility:hidden}@keyframes ldin{from{opacity:0;letter-spacing:.9em}}
 @media (prefers-reduced-motion:reduce){body::after,.ld span{animation:none}.hv{transform:none}}
 @media(max-width:800px){.hrow figure{height:56vh}}
+.grid{columns:auto;display:grid;grid-template-columns:repeat(3,1fr);column-gap:20px;grid-auto-rows:4px;grid-auto-flow:dense}
+.tile{margin:0;align-self:start}
+.tile.rev{transition:opacity .9s,transform .9s,box-shadow .6s}
+.tile img.ph{opacity:0;transition:opacity .8s,transform .9s cubic-bezier(.2,.7,.2,1)}.tile img.ph.ld2{opacity:1}
+.lb{transition:background .6s}
+:focus-visible{outline:2px solid var(--ac);outline-offset:3px}
+::view-transition-group(*){animation-duration:.55s}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr);column-gap:12px}}
+@media(pointer:coarse){body::after{animation:none}}
+@media(prefers-reduced-motion:reduce){.rev{opacity:1;transform:none;transition:none}.tile img.ph{opacity:1}}
+[hidden]{display:none!important}
+body{transition:background .8s}
+.chap{position:relative;min-height:88vh;display:flex;align-items:flex-end;padding:0 4vw 9vh;overflow:hidden;cursor:pointer;background:var(--c,#222);color:#fff}
+.chap .cbg{position:absolute;inset:-12% 0;will-change:transform}
+.chap::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 35%,rgba(0,0,0,.7))}
+.chap .ct{position:relative;z-index:1;max-width:760px;opacity:0;transform:translateY(30px);transition:opacity 1s,transform 1s}.chap.in .ct{opacity:1;transform:none}
+.chap h3{font:200 clamp(30px,6vw,84px)/1 Inter,system-ui,sans-serif;text-transform:uppercase;letter-spacing:.06em}
+.chap p{margin-top:1rem;font-size:12px;letter-spacing:.25em;text-transform:uppercase;opacity:.85}
+#series .label{padding:12vh 4vw 4vh}
+.views{display:flex;gap:1.6rem;margin-bottom:1.2rem}
+.views button{background:none;border:0;color:var(--mute);font:inherit;font-size:12px;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;padding:4px 0;border-bottom:1px solid transparent}
+.views button.on{color:var(--ac);border-color:var(--ac)}
+#map{height:72vh;min-height:420px;position:relative;isolation:isolate;background:var(--card)}
+.leaflet-container{font:inherit}
+.leaflet-tooltip{background:var(--card);color:var(--fg);border:1px solid var(--line);font:300 12px Inter,system-ui,sans-serif}
+.leaflet-tooltip img{display:block;margin-top:6px}
+.dot{width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid #fff;box-shadow:0 0 0 6px rgba(232,184,106,.25);transition:transform .3s}.dot:hover{transform:scale(1.4)}
 </style>
 </head>
 <body>
@@ -142,13 +171,18 @@ body::after{content:"";position:fixed;inset:-50%;width:200%;height:200%;pointer-
   </div>
 </section>
 
+<section id="feat" style="padding-right:0;display:none"><div class="label">Featured</div><div class="hrow" id="hrow"></div></section>
+
+<section id="series" style="padding:0;display:none"></section>
+
 <section id="work">
   <div class="label">Portfolio</div>
+  <div class="views"><button data-v="grid" class="on">Grid</button><button data-v="map">Map</button></div>
   <div class="filters" id="filters"></div>
+  <div id="map" hidden></div><p id="mapnote" hidden style="color:var(--mute)">No photos have map coordinates yet. In edit mode, click Locate.</p>
   <div class="grid" id="grid" aria-live="polite"></div>
 </section>
 
-<section id="feat" style="padding-right:0;display:none"><div class="label">Featured</div><div class="hrow" id="hrow"></div></section>
 
 <section class="quote">
   <div class="label">Philosophy</div>
@@ -238,21 +272,23 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
     drawFeat();
     D.items.forEach(function (it, i) {
       var f = document.createElement('figure');
-      f.className = 'tile rev in'; f.dataset.c = it.c || ''; f.dataset.i = i;
+      f.className = 'tile rev'; f.style.transitionDelay = (i % 3) * 90 + 'ms'; f.tabIndex = 0; f.setAttribute('aria-label', it.t || 'Photo'); f.dataset.c = it.c || ''; f.dataset.i = i; io.observe(f);
       var ratio = esc(it.r || '3/2');
       f.innerHTML = (it.img
         ? (it.vid
           ? '<video class="ph" muted loop playsinline preload="none" data-src="' + esc(it.vid) + '" poster="' + esc(url(it.img)) + '" style="aspect-ratio:' + ratio + '"></video>'
-          : '<img class="ph" loading="lazy" decoding="async" src="' + esc(url(it.img)) + '" alt="' + esc(it.alt || it.t) + '" style="aspect-ratio:' + ratio + '">')
+          : '<img class="ph" loading="lazy" decoding="async" src="' + esc(url(it.img)) + '" alt="' + esc(it.alt || it.t) + '" style="aspect-ratio:' + ratio + ';background:' + esc(it.dc || 'transparent') + '">')
         : '<div class="ph" role="img" aria-label="' + esc(it.t) + '" style="aspect-ratio:' + ratio + ';background:' + bg(it) + '"></div>')
         + '<figcaption><b>' + String(i + 1).padStart(2, '0') + '</b>' + esc(it.t) + (it.c ? ' — ' + esc(it.c) : '') + '</figcaption>'
         + '<div class="ctl"><button data-a="img">Photo</button><button data-a="ed">Details</button><button data-a="mo">Motion</button><button data-a="l">←</button><button data-a="r">→</button><button data-a="del">Delete</button></div>';
       var im = f.querySelector('img');
-      if (im && !it.r) im.onload = function () { it.r = im.naturalWidth + '/' + im.naturalHeight; im.style.aspectRatio = it.r; };
+      if (im && !it.r) im.onload = function () { it.r = im.naturalWidth + '/' + im.naturalHeight; im.style.aspectRatio = it.r; layout(); };
+      if (im) { var ok = function () { im.classList.add('ld2'); }; if (im.complete) ok(); else { im.addEventListener('load', ok); im.addEventListener('error', ok); } }
       f.classList.toggle('hide', flt !== 'all' && it.c !== flt);
       g.appendChild(f);
       var vd = f.querySelector('video'); if (vd && !reduce) vio.observe(vd);
     });
+    layout(); drawMap(); drawSeries();
   }
   function buildFilters() {
     D.items.forEach(function (it) { if (it.c && D.cats.indexOf(it.c) < 0) D.cats.push(it.c); });
@@ -274,34 +310,109 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
     if (!b.dataset.f) return;
     [].forEach.call(this.querySelectorAll('button'), function (x) { x.classList.remove('on'); });
     b.classList.add('on'); flt = b.dataset.f;
-    [].forEach.call(g.children, function (t) { t.classList.toggle('hide', flt !== 'all' && t.dataset.c !== flt); });
+    var apply = function () { [].forEach.call(g.children, function (t) { t.classList.toggle('hide', flt !== 'all' && t.dataset.c !== flt); }); layout(); drawMap(); };
+    if (document.startViewTransition && !reduce) { [].forEach.call(g.children, function (t, n) { t.style.viewTransitionName = 'p' + n; }); document.startViewTransition(apply); } else apply();
   };
   function visible() { return [].slice.call(g.children).filter(function (t) { return !t.classList.contains('hide'); }); }
   function show(n) {
     vis = visible(); if (!vis.length) return;
     cur = (n + vis.length) % vis.length;
     var it = D.items[+vis[cur].dataset.i], p = $('lbph'), a = String(it.r || '3/2').split('/');
-    p.style.background = bg(it);
+    p.style.background = bg(it); lb.style.background = it.dc ? 'color-mix(in srgb,' + it.dc + ' 22%,#0a0a09 78%)' : '';
     p.innerHTML = it.vid ? '<video src="' + esc(it.vid) + '" poster="' + esc(url(it.img)) + '" autoplay muted loop playsinline ' + (reduce ? 'controls ' : '') + 'style="width:100%;height:100%;object-fit:cover;display:block"></video>' : ''; p.style.setProperty('--ar', it.r || '3/2'); p.style.setProperty('--r', a[0] / (a[1] || 1));
     var rows = [['Series', it.s], ['Location', it.loc], ['Date', it.date], ['Camera', it.cam], ['Settings', it.set]].filter(function (r) { return r[1]; })
       .map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd>'; }).join('');
     $('lbinfo').innerHTML = '<div class="cat">No. ' + String(+vis[cur].dataset.i + 1).padStart(2, '0') + ' / ' + String(D.items.length).padStart(2, '0') + (it.c ? ' · ' + esc(it.c) : '') + '</div>' + '<h3>' + esc(it.t) + '</h3>' + (it.vid && it.vai ? '<div class="cat" style="margin:-10px 0 16px">Animated with AI</div>' : '')
       + (rows ? '<dl>' + rows + '</dl>' : '') + (it.story ? '<p>' + esc(it.story).replace(/\n/g, '<br>') + '</p>' : '');
+    [1, -1].forEach(function (d) { var j = D.items[+vis[(cur + d + vis.length) % vis.length].dataset.i]; if (j && j.img && !j.vid) { new Image().src = j.img; } });
+    try { history.replaceState(null, '', '#photo-' + (+vis[cur].dataset.i + 1)); } catch (e) {}
+    setTimeout(function () { var x = lb.querySelector('.x'); if (x) x.focus({ preventScroll: true }); }, 60);
   }
   lb.onclick = function (e) {
     if (e.target.classList.contains('nx')) show(cur + 1);
     else if (e.target.classList.contains('pv')) show(cur - 1);
-    else if (!e.target.closest('.lbin')) { lb.classList.remove('open'); $('lbph').innerHTML = ''; }
+    else if (!e.target.closest('.lbin')) { closeLb(); }
   };
   document.addEventListener('keydown', function (e) {
     if (!lb.classList.contains('open')) return;
-    if (e.key === 'Escape') { lb.classList.remove('open'); $('lbph').innerHTML = ''; }
+    if (e.key === 'Escape') { closeLb(); }
     if (e.key === 'ArrowRight') show(cur + 1);
     if (e.key === 'ArrowLeft') show(cur - 1);
   });
   var io = new IntersectionObserver(function (es) { es.forEach(function (x) { if (x.isIntersecting) { x.target.classList.add('in'); io.unobserve(x.target); } }); }, { threshold: .12 });
   document.querySelectorAll('.rev').forEach(function (el) { io.observe(el); });
-  function init(d) { D = d; D.t = D.t || {}; D.items = D.items || []; D.cats = D.cats || DEFAULT_CATS.slice(); applyTexts(); hero(); buildFilters(); draw(); }
+  function closeLb() { lb.classList.remove('open'); $('lbph').innerHTML = ''; try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} }
+  var tx = null;
+  lb.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; }, { passive: true });
+  lb.addEventListener('touchend', function (e) { if (tx == null) return; var d = e.changedTouches[0].clientX - tx; tx = null; if (Math.abs(d) > 60) show(cur + (d < 0 ? 1 : -1)); }, { passive: true });
+  document.addEventListener('keydown', function (e) { var t = e.target; if ((e.key === 'Enter' || e.key === ' ') && t.matches && t.matches('.tile,.hrow figure,.chap') && !edit) { e.preventDefault(); t.click(); } });
+  function layout() {
+    var m = innerWidth <= 800, gap = m ? 12 : 20, cols = m ? 2 : 3, w = (g.clientWidth - gap * (cols - 1)) / cols;
+    [].forEach.call(g.children, function (t) { var it = D.items[+t.dataset.i], a = String(it.r || '3/2').split('/'); t.style.gridRowEnd = 'span ' + Math.ceil((w * (a[1] || 1) / a[0] + gap) / 4); });
+  }
+  window.addEventListener('resize', layout);
+  function mailfix() { var m = (D.t.contactText || '').match(/[^\s@]+@[^\s@]+\.[^\s@]+/), a = document.querySelector('a[href^="mailto:"]'); if (m && a) a.href = 'mailto:' + m[0]; }
+  function openHash() { var m = /^#photo-(\d+)$/.exec(location.hash); if (!m || edit) return; var t = g.children[+m[1] - 1]; if (t && !t.classList.contains('hide')) { show(visible().indexOf(t)); lb.classList.add('open'); } }
+  /* ---------- series chapters + map ---------- */
+  var live = {}, map = null, tl = null, mk = null, view = 'grid';
+  var so = new IntersectionObserver(function (es) {
+    es.forEach(function (x) { var c = x.target; if (x.isIntersecting) { c.classList.add('in'); live[c.dataset.i] = c.dataset.dc; } else delete live[c.dataset.i]; });
+    var k = Object.keys(live).pop();
+    document.body.style.background = k && live[k] ? 'color-mix(in srgb,' + live[k] + ' 18%,var(--bg))' : '';
+  }, { threshold: .5 });
+  function openAt(i) {
+    if (flt !== 'all') { flt = 'all'; [].forEach.call(g.children, function (t) { t.classList.remove('hide'); }); buildFilters(); layout(); }
+    show(visible().findIndex(function (t) { return +t.dataset.i === i; })); lb.classList.add('open');
+  }
+  function drawSeries() {
+    var sec = $('series'), by = {}, order = []; so.disconnect(); live = {};
+    D.items.forEach(function (it, i) { if (!it.s) return; if (!by[it.s]) { by[it.s] = []; order.push(it.s); } by[it.s].push(i); });
+    sec.innerHTML = order.length ? '<div class="label">Series</div>' : ''; sec.style.display = order.length ? '' : 'none';
+    order.forEach(function (name, n) {
+      var ids = by[name], c = ids.filter(function (i) { return D.items[i].img; })[0], cov = D.items[c != null ? c : ids[0]];
+      var a = document.createElement('article'); a.className = 'chap'; a.tabIndex = 0; a.dataset.i = ids[0]; a.dataset.dc = cov.dc || ''; a.style.setProperty('--c', cov.dc || '#222');
+      a.innerHTML = '<div class="cbg"></div><div class="ct"><p>Chapter ' + String(n + 1).padStart(2, '0') + '</p><h3>' + esc(name) + '</h3><p>' + ids.length + (ids.length > 1 ? ' photographs' : ' photograph') + (cov.loc ? ' · ' + esc(cov.loc) : '') + '</p></div>';
+      a.firstChild.style.background = bg(cov); sec.appendChild(a); so.observe(a);
+    });
+  }
+  $('series').onclick = function (e) { var c = e.target.closest('.chap'); if (c && !edit) openAt(+c.dataset.i); };
+  window.addEventListener('scroll', function () {
+    if (reduce) return;
+    [].forEach.call(document.querySelectorAll('.chap'), function (c) { var r = c.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; c.firstChild.style.transform = 'translateY(' + (r.top * -0.08) + 'px)'; });
+  }, { passive: true });
+  function tiles() { return 'https://{s}.basemaps.cartocdn.com/' + (document.documentElement.dataset.theme === 'light' ? 'light_all' : 'dark_all') + '/{z}/{x}/{y}{r}.png'; }
+  function loadLeaflet(cb) {
+    if (window.L) { cb(); return; }
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'; document.head.appendChild(l);
+    var sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js'; sc.onload = cb; document.head.appendChild(sc);
+  }
+  function drawMap() {
+    if (!map) return; mk.clearLayers(); var pts = [];
+    D.items.forEach(function (it, i) {
+      var la = parseFloat(it.lat), ln = parseFloat(it.lng); if (isNaN(la) || isNaN(ln) || (flt !== 'all' && it.c !== flt)) return;
+      var m = L.marker([la, ln], { icon: L.divIcon({ className: '', html: '<div class="dot"></div>', iconSize: [16, 16] }) });
+      m.bindTooltip('<b>' + esc(it.t) + '</b>' + (it.img ? '<br><img src="' + esc(url(it.img)) + '" width="160" alt="">' : ''), { direction: 'top', offset: [0, -8] });
+      m.on('click', function () { openAt(i); });
+      mk.addLayer(m); pts.push([la, ln]);
+    });
+    if (pts.length) map.fitBounds(pts, { padding: [60, 60], maxZoom: 9 });
+    $('mapnote').hidden = !!pts.length || view !== 'map';
+  }
+  function setView(v) {
+    view = v; $('map').hidden = v !== 'map'; g.hidden = v === 'map';
+    [].forEach.call(document.querySelectorAll('.views button'), function (b) { b.classList.toggle('on', b.dataset.v === v); });
+    if (v !== 'map') { $('mapnote').hidden = true; return; }
+    loadLeaflet(function () {
+      if (!map) {
+        map = L.map('map', { worldCopyJump: true }).setView([-25, 134], 4);
+        tl = L.tileLayer(tiles(), { attribution: '© OpenStreetMap, © CARTO', maxZoom: 18 }).addTo(map); mk = L.layerGroup().addTo(map);
+        new MutationObserver(function () { tl.setUrl(tiles()); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      }
+      map.invalidateSize(); drawMap();
+    });
+  }
+  document.querySelector('.views').onclick = function (e) { var b = e.target.closest('button'); if (b) setView(b.dataset.v); };
+  function init(d) { D = d; D.t = D.t || {}; D.items = D.items || []; D.cats = D.cats || DEFAULT_CATS.slice(); applyTexts(); mailfix(); hero(); buildFilters(); draw(); openHash(); }
 
   /* ---------- Supabase ---------- */
   var sb = (window.supabase && /^https:\/\//.test(window.SUPABASE_URL || '')) ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY) : null;
@@ -323,6 +434,7 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
   }
 
   /* ---------- images ---------- */
+  function dom(c) { try { var t = document.createElement('canvas'); t.width = t.height = 1; var x = t.getContext('2d'); x.drawImage(c, 0, 0, 1, 1); var p = x.getImageData(0, 0, 1, 1).data; return 'rgb(' + p[0] + ',' + p[1] + ',' + p[2] + ')'; } catch (e) { return ''; } }
   function shrink(file) {
     return new Promise(function (res, rej) {
       var im = new Image(), u = URL.createObjectURL(file);
@@ -330,7 +442,7 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
         var s = Math.min(1, 2200 / Math.max(im.width, im.height)), c = document.createElement('canvas');
         c.width = Math.round(im.width * s); c.height = Math.round(im.height * s);
         c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
-        c.toBlob(function (b) { URL.revokeObjectURL(u); b ? res({ blob: b, w: c.width, h: c.height }) : rej(new Error('Could not read image')); }, 'image/jpeg', .88);
+        c.toBlob(function (b) { URL.revokeObjectURL(u); b ? res({ blob: b, w: c.width, h: c.height, dc: dom(c) }) : rej(new Error('Could not read image')); }, 'image/jpeg', .88);
       };
       im.onerror = function () { rej(new Error('Not a supported image')); }; im.src = u;
     });
@@ -343,7 +455,7 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
     var path = slug + '-' + Date.now().toString(36) + '.jpg';
     var up = await sb.storage.from('photos').upload(path, s.blob, { contentType: 'image/jpeg', cacheControl: '31536000' });
     if (up.error) throw up.error;
-    return { url: sb.storage.from('photos').getPublicUrl(path).data.publicUrl, ar: s.w + '/' + s.h };
+    return { url: sb.storage.from('photos').getPublicUrl(path).data.publicUrl, ar: s.w + '/' + s.h, dc: s.dc };
   }
   function pick(multi, cb) {
     var f = document.createElement('input'); f.type = 'file'; f.accept = 'image/*'; f.multiple = !!multi;
@@ -359,7 +471,7 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
 
   /* ---------- editing UI ---------- */
   function modal(html) { var m = document.createElement('div'); m.className = 'ed'; m.innerHTML = '<div class="edin">' + html + '</div>'; document.body.appendChild(m); return m; }
-  var FL = [['t', 'Title'], ['c', 'Category'], ['s', 'Series / shoot'], ['f', 'In the scroll gallery?'], ['loc', 'Location'], ['date', 'Date'], ['cam', 'Camera'], ['set', 'Settings'], ['story', 'Story / background']];
+  var FL = [['t', 'Title'], ['c', 'Category'], ['s', 'Series / shoot'], ['f', 'In the scroll gallery?'], ['loc', 'Location'], ['lat', 'Latitude'], ['lng', 'Longitude'], ['date', 'Date'], ['cam', 'Camera'], ['set', 'Settings'], ['story', 'Story / background']];
   var ed = modal('<h4 class="serif" style="font-size:30px;font-weight:300">Photo details</h4>' + FL.map(function (f) {
     var k = f[0];
     return '<label>' + f[1] + (k === 'c' ? '<input data-f="c" list="cats" autocomplete="off"><datalist id="cats"><option>landscape</option><option>street</option><option>portrait</option><option>architecture</option></datalist>'
@@ -455,7 +567,7 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
 
   function act(b, i) {
     var a = b.dataset.a, it = D.items[i], j;
-    if (a === 'img') pick(false, function (r) { it.img = r.url; it.r = r.ar; delete it.vid; delete it.vai; mark(); draw(); });
+    if (a === 'img') pick(false, function (r) { it.img = r.url; it.r = r.ar; it.dc = r.dc; delete it.vid; delete it.vai; mark(); draw(); });
     else if (a === 'ed') openEd(i);
     else if (a === 'mo') openMo(i);
     else if (a === 'l' || a === 'r') { j = a === 'l' ? i - 1 : i + 1; if (j < 0 || j >= D.items.length) return; D.items[i] = D.items[j]; D.items[j] = it; mark(); draw(); }
@@ -490,22 +602,24 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
   }
   var B = document.createElement('div'); B.className = 'bar'; B.style.display = 'none'; document.body.appendChild(B);
   function bar() {
-    B.innerHTML = (edit ? '<button data-b="add">+ Add photos</button><button data-b="hero">Hero image</button><button data-b="hvid">Hero video</button>' + (D.heroVid ? '<button data-b="hvrm">Remove video</button>' : '') + '<button class="pri" data-b="save">Save to GitHub</button><button data-b="exit">Done</button>'
+    B.innerHTML = (edit ? '<button data-b="add">+ Add photos</button><button data-b="hero">Hero image</button><button data-b="hvid">Hero video</button><button data-b="col">Colours</button><button data-b="geo">Locate</button>' + (D.heroVid ? '<button data-b="hvrm">Remove video</button>' : '') + '<button class="pri" data-b="save">Save to GitHub</button><button data-b="exit">Done</button>'
       : '<button data-b="on">✎ Edit site' + (dirty ? ' · unsaved' : '') + '</button>') + '<button data-b="out">Sign out</button><span id="st"></span>';
     if (edit && dirty) say('Unsaved changes');
   }
   function setEdit(v) {
-    edit = v; document.body.classList.toggle('editing', v);
+    edit = v; if (v && view === 'map') setView('grid'); document.body.classList.toggle('editing', v);
     document.querySelectorAll('[data-k]').forEach(function (e) { if (v) e.setAttribute('contenteditable', 'true'); else e.removeAttribute('contenteditable'); });
     buildFilters(); bar();
   }
   B.onclick = function (e) {
     var b = e.target.closest('button'); if (!b) return; var k = b.dataset.b;
     if (k === 'on') setEdit(true); else if (k === 'exit') setEdit(false);
-    else if (k === 'add') pick(true, function (r, f) { D.items.push({ t: f.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '), c: flt === 'all' ? (D.cats[0] || 'landscape') : flt, img: r.url, r: r.ar }); mark(); buildFilters(); draw(); });
+    else if (k === 'add') pick(true, function (r, f) { D.items.push({ t: f.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '), c: flt === 'all' ? (D.cats[0] || 'landscape') : flt, img: r.url, r: r.ar, dc: r.dc }); mark(); buildFilters(); draw(); });
     else if (k === 'hero') pick(false, function (r) { D.hero = r.url; mark(); hero(); });
     else if (k === 'hvid') pickHeroVideo();
     else if (k === 'hvrm') { delete D.heroVid; mark(); hero(); bar(); }
+    else if (k === 'geo') { var todo = D.items.filter(function (it) { return it.loc && !it.lat; }); (function nx() { var it = todo.shift(); if (!it) { say(dirty ? 'Located. Click Save.' : 'Nothing to locate'); draw(); return; } say('Locating ' + it.loc + '…'); fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(it.loc)).then(function (r) { return r.json(); }).then(function (r) { if (r[0]) { it.lat = r[0].lat; it.lng = r[0].lon; mark(); } }).catch(function () {}).then(function () { setTimeout(nx, 1100); }); })(); }
+    else if (k === 'col') { say('Reading colours…'); D.items.forEach(function (it) { if (!it.img || it.dc) return; var im = new Image(); im.crossOrigin = 'anonymous'; im.onload = function () { it.dc = dom(im); if (it.dc) { mark(); draw(); } }; im.src = it.img; }); }
     else if (k === 'save') save();
     else if (k === 'out') { dirty = false; sb.auth.signOut().then(function () { location.reload(); }); }
   };
@@ -526,7 +640,8 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
   document.querySelector('header nav').appendChild(tg);
   tg.onclick = function () { var n = root.dataset.theme === 'light' ? 'dark' : 'light'; root.dataset.theme = n; try { localStorage.setItem('theme', n); } catch (e) {} };
   document.body.insertAdjacentHTML('afterbegin', '<div class="ld" id="ld"><span>' + esc(document.querySelector('.logo').textContent) + '</span></div>');
-  setTimeout(function () { $('ld').classList.add('off'); }, 1600);
+  var seen = false; try { seen = sessionStorage.getItem('seen'); sessionStorage.setItem('seen', '1'); } catch (e) {}
+  if (seen) $('ld').remove(); else setTimeout(function () { $('ld').classList.add('off'); }, 1600);
   if (matchMedia('(pointer:fine)').matches && !reduce) {
     var gl = document.createElement('div'), rg = document.createElement('div'); gl.className = 'glow'; rg.className = 'ring';
     document.body.appendChild(gl); document.body.appendChild(rg);
@@ -550,7 +665,7 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
     row.innerHTML = '';
     D.items.forEach(function (it, i) {
       if (it.f !== 'yes') return; n++;
-      var f = document.createElement('figure'); f.dataset.i = i;
+      var f = document.createElement('figure'); f.dataset.i = i; f.tabIndex = 0;
       f.innerHTML = '<div class="ph" style="aspect-ratio:' + esc(it.r || '3/2') + ';background:' + bg(it) + '"></div><figcaption><b>' + String(i + 1).padStart(2, '0') + '</b>' + esc(it.t) + '</figcaption>';
       row.appendChild(f);
     });
