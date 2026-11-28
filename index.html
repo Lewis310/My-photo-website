@@ -145,12 +145,29 @@ body{transition:background .8s}
 .dot{width:16px;height:16px;border-radius:50%;background:var(--ac);border:2px solid #fff;box-shadow:0 0 0 6px rgba(232,184,106,.25);transition:transform .3s}.dot:hover{transform:scale(1.4)}
 .fnav button{background:none;border:1px solid var(--line);color:var(--fg);border-radius:50%;width:38px;height:38px;cursor:pointer;margin-left:8px;font-size:16px}.fnav button:hover{color:var(--ac);border-color:var(--ac)}
 .hrow{cursor:grab}.hrow.drag{cursor:grabbing;user-select:none}
+.scrub{display:flex;align-items:center;gap:14px;margin-bottom:1.6rem;font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--mute)}
+.scrub input{flex:1;accent-color:var(--ac)}.scrub #scl{min-width:15ch;color:var(--fg)}
+.scrub button{background:none;border:1px solid var(--line);color:var(--fg);border-radius:50%;width:34px;height:34px;cursor:pointer}
+.tile.tgone{display:none}.tile.tnew{animation:tin .7s both}@keyframes tin{from{opacity:0;transform:scale(.94)}}
+.cstrip{height:10px;margin-bottom:14px}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px}
+.csq{aspect-ratio:1;padding:0;border:0;cursor:pointer;overflow:hidden}
+.csq img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s}.csq:hover img{transform:scale(1.12)}
+.gearsec{display:grid;grid-template-columns:1fr 1.4fr;gap:6vw;border-top:1px solid var(--line)}
+.gearsec h2{font:200 clamp(22px,3vw,42px)/1.1 Inter,system-ui,sans-serif;text-transform:uppercase;letter-spacing:.06em}
+#gstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:2.2rem}
+.gh{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--mute);margin-bottom:.8rem}
+.gb{display:grid;grid-template-columns:minmax(90px,38%) 1fr 3ch;align-items:center;gap:10px;font-size:12px;margin-bottom:8px}
+.gb u{display:block;height:2px;background:var(--line)}.gb i{display:block;height:2px;width:0;background:var(--ac);transition:width 1.2s cubic-bezier(.2,.7,.2,1)}
+.gb b{font-weight:400;text-align:right}.rev.in .gb i{width:var(--w)}
+.gtot{display:flex;gap:2.2rem;margin-bottom:2rem;flex-wrap:wrap}.gtot b{display:block;font:200 clamp(30px,4vw,56px)/1 Inter,system-ui,sans-serif}.gtot span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+@media(max-width:800px){.gearsec{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <header>
   <a href="#top" class="logo serif" data-k="logo">Kennie</a>
-  <nav><a href="#work">Work</a><a href="#about">About</a><a href="#contact">Contact</a></nav>
+  <nav><a href="#work">Work</a><a href="#gear">Gear</a><a href="#about">About</a><a href="#contact">Contact</a></nav>
 </header>
 
 <div class="hero" id="top">
@@ -179,12 +196,18 @@ body{transition:background .8s}
 
 <section id="work">
   <div class="label">Portfolio</div>
-  <div class="views"><button data-v="grid" class="on">Grid</button><button data-v="map">Map</button></div>
+  <div class="views"><button data-v="grid" class="on">Grid</button><button data-v="map">Map</button><button data-v="color">Colour</button></div>
+  <div class="scrub" id="scrub" hidden><button id="scp" aria-label="Play timeline">▶</button><span id="scl">All time</span><input type="range" id="scr" min="0" max="0" value="0" step="1" aria-label="Time scrubber"><span id="scn"></span></div>
   <div class="filters" id="filters"></div>
-  <div id="map" hidden></div><p id="mapnote" hidden style="color:var(--mute)">No photos have map coordinates yet. In edit mode, click Locate.</p>
+  <div id="cwall" hidden></div><div id="map" hidden></div><p id="mapnote" hidden style="color:var(--mute)">No photos have map coordinates yet. In edit mode, click Locate.</p>
   <div class="grid" id="grid" aria-live="polite"></div>
 </section>
 
+
+<section class="gearsec" id="gear">
+  <div class="rev"><div class="label">Gear &amp; settings</div><h2 data-k="gearTitle">What I shoot with.</h2><p data-k="gearText" style="margin-top:1.2rem;color:var(--mute);white-space:pre-line;max-width:40ch">Add your kit here in edit mode: bodies, lenses, tripod, filters, bag.</p></div>
+  <div class="rev"><div class="gtot" id="gtot"></div><div id="gstats"></div></div>
+</section>
 
 <section class="quote">
   <div class="label">Philosophy</div>
@@ -290,7 +313,7 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
       g.appendChild(f);
       var vd = f.querySelector('video'); if (vd && !reduce) vio.observe(vd);
     });
-    layout(); drawMap(); drawSeries();
+    layout(); drawMap(); drawSeries(); buildScrub(); drawGear();
   }
   function buildFilters() {
     D.items.forEach(function (it) { if (it.c && D.cats.indexOf(it.c) < 0) D.cats.push(it.c); });
@@ -312,10 +335,10 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
     if (!b.dataset.f) return;
     [].forEach.call(this.querySelectorAll('button'), function (x) { x.classList.remove('on'); });
     b.classList.add('on'); flt = b.dataset.f;
-    var apply = function () { [].forEach.call(g.children, function (t) { t.classList.toggle('hide', flt !== 'all' && t.dataset.c !== flt); }); layout(); drawMap(); };
+    var apply = function () { [].forEach.call(g.children, function (t) { t.classList.toggle('hide', flt !== 'all' && t.dataset.c !== flt); }); layout(); drawMap(); drawWall(); };
     if (document.startViewTransition && !reduce) { [].forEach.call(g.children, function (t, n) { t.style.viewTransitionName = 'p' + n; }); document.startViewTransition(apply); } else apply();
   };
-  function visible() { return [].slice.call(g.children).filter(function (t) { return !t.classList.contains('hide'); }); }
+  function visible() { return [].slice.call(g.children).filter(function (t) { return !t.classList.contains('hide') && !t.classList.contains('tgone'); }); }
   function show(n) {
     vis = visible(); if (!vis.length) return;
     cur = (n + vis.length) % vis.length;
@@ -363,6 +386,7 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
     document.body.style.background = k && live[k] ? 'color-mix(in srgb,' + live[k] + ' 18%,var(--bg))' : '';
   }, { threshold: .5 });
   function openAt(i) {
+    if (tcut < Infinity) setCut(Infinity);
     if (flt !== 'all') { flt = 'all'; [].forEach.call(g.children, function (t) { t.classList.remove('hide'); }); buildFilters(); layout(); }
     show(visible().findIndex(function (t) { return +t.dataset.i === i; })); lb.classList.add('open');
   }
@@ -391,18 +415,19 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
   function drawMap() {
     if (!map) return; mk.clearLayers(); var pts = [];
     D.items.forEach(function (it, i) {
-      var la = parseFloat(it.lat), ln = parseFloat(it.lng); if (isNaN(la) || isNaN(ln) || (flt !== 'all' && it.c !== flt)) return;
+      var la = parseFloat(it.lat), ln = parseFloat(it.lng); if (isNaN(la) || isNaN(ln) || ts(it) > tcut || (flt !== 'all' && it.c !== flt)) return;
       var m = L.marker([la, ln], { icon: L.divIcon({ className: '', html: '<div class="dot"></div>', iconSize: [16, 16] }) });
       m.bindTooltip('<b>' + esc(it.t) + '</b>' + (it.img ? '<br><img src="' + esc(url(it.th || it.img)) + '" width="160" alt="">' : ''), { direction: 'top', offset: [0, -8] });
       m.on('click', function () { openAt(i); });
       mk.addLayer(m); pts.push([la, ln]);
     });
-    if (pts.length) map.fitBounds(pts, { padding: [60, 60], maxZoom: 9 });
+    if (pts.length && !scrub) map.fitBounds(pts, { padding: [60, 60], maxZoom: 9 });
     $('mapnote').hidden = !!pts.length || view !== 'map';
   }
   function setView(v) {
-    view = v; $('map').hidden = v !== 'map'; g.hidden = v === 'map';
+    view = v; $('map').hidden = v !== 'map'; $('cwall').hidden = v !== 'color'; g.hidden = v !== 'grid';
     [].forEach.call(document.querySelectorAll('.views button'), function (b) { b.classList.toggle('on', b.dataset.v === v); });
+    if (v === 'color') drawWall();
     if (v !== 'map') { $('mapnote').hidden = true; return; }
     loadLeaflet(function () {
       if (!map) {
@@ -466,6 +491,81 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
   window.addEventListener('pointermove', function (e) { if (fx == null) return; var d = e.clientX - fx; if (Math.abs(d) > 5) { fm = true; frow.style.scrollSnapType = 'none'; frow.classList.add('drag'); } frow.scrollLeft = fs - d; });
   window.addEventListener('pointerup', function () { if (fx == null) return; fx = null; frow.classList.remove('drag'); frow.style.scrollSnapType = ''; });
   frow.addEventListener('click', function (e) { if (fm) { e.stopPropagation(); e.preventDefault(); fm = false; } }, true);
+  /* ---------- time scrubber, colour wall, gear ---------- */
+  var tcut = Infinity, scrub = false, months = [], pl = null;
+  function ts(it) {
+    var m = /(\d{4})/.exec((it && it.date) || ''); if (!m) return NaN;
+    var x = /jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/i.exec(it.date);
+    return +m[1] * 12 + (x ? 'janfebmaraprmayjunjulaugsepoctnovdec'.indexOf(x[0].toLowerCase()) / 3 : 0);
+  }
+  function mname(t) { return new Date(Math.floor(t / 12), t % 12).toLocaleString('en-AU', { month: 'long', year: 'numeric' }); }
+  function setCut(t) {
+    tcut = t; var gone = 0;
+    [].forEach.call(g.children, function (tile) {
+      var out = ts(D.items[+tile.dataset.i]) > tcut, was = tile.classList.contains('tgone');
+      tile.classList.toggle('tgone', out); if (out) gone++;
+      if (was && !out) { tile.classList.add('tnew'); setTimeout(function () { tile.classList.remove('tnew'); }, 700); }
+    });
+    var r = $('scr'); r.value = Math.max(t === Infinity ? months.length - 1 : months.indexOf(t), 0);
+    $('scl').textContent = t === Infinity ? 'All time' : mname(t);
+    $('scn').textContent = (D.items.length - gone) + ' / ' + D.items.length;
+    scrub = true; layout(); drawMap(); drawWall(); scrub = false;
+  }
+  function buildScrub() {
+    var set = {}; D.items.forEach(function (it) { var t = ts(it); if (!isNaN(t)) set[t] = 1; });
+    months = Object.keys(set).map(Number).sort(function (a, b) { return a - b; });
+    var sc = $('scrub'); tcut = Infinity; sc.hidden = months.length < 2; if (sc.hidden) return;
+    var r = $('scr'); r.max = months.length - 1; r.value = r.max; $('scl').textContent = 'All time'; $('scn').textContent = D.items.length + ' / ' + D.items.length;
+  }
+  $('scr').oninput = function () { var v = +this.value; setCut(v >= months.length - 1 ? Infinity : months[v]); };
+  $('scp').onclick = function () {
+    var b = this, v = 0;
+    if (pl) { clearInterval(pl); pl = null; b.textContent = '▶'; return; }
+    setCut(months[0]); b.textContent = '❚❚';
+    pl = setInterval(function () { v++; if (v >= months.length - 1) { setCut(Infinity); clearInterval(pl); pl = null; b.textContent = '▶'; return; } setCut(months[v]); }, 700);
+  };
+  function drawWall() {
+    if (view !== 'color') return;
+    var w = $('cwall'), rows = [];
+    D.items.forEach(function (it, i) {
+      if (!it.dc || (flt !== 'all' && it.c !== flt) || ts(it) > tcut) return;
+      var m = /(\d+),\s*(\d+),\s*(\d+)/.exec(it.dc); if (!m) return;
+      var r = m[1] / 255, gr = m[2] / 255, bl = m[3] / 255, mx = Math.max(r, gr, bl), mn = Math.min(r, gr, bl), d = mx - mn, h = 0;
+      if (d) h = mx === r ? ((gr - bl) / d + 6) % 6 : mx === gr ? (bl - r) / d + 2 : (r - gr) / d + 4;
+      rows.push({ i: i, it: it, h: h * 60, l: (mx + mn) / 2, s: d / (1 - Math.abs(mx + mn - 1) || 1) });
+    });
+    rows.sort(function (a, b) { var an = a.s < .12, bn = b.s < .12; return an !== bn ? (an ? 1 : -1) : an ? a.l - b.l : (a.h - b.h || a.l - b.l); });
+    if (!rows.length) { w.innerHTML = '<p style="color:var(--mute)">No colour data yet. In edit mode, click Colours, then Save.</p>'; return; }
+    var cs = rows.map(function (x) { return x.it.dc; });
+    w.innerHTML = '<div class="cstrip" style="background:' + (cs.length > 1 ? 'linear-gradient(90deg,' + cs.join(',') + ')' : cs[0]) + '"></div><div class="cgrid">'
+      + rows.map(function (x) { var u = x.it.th || x.it.img; return '<button class="csq" data-i="' + x.i + '" aria-label="' + esc(x.it.t) + '" style="background:' + esc(x.it.dc) + '">' + (u ? '<img loading="lazy" alt="" src="' + esc(url(u)) + '">' : '') + '</button>'; }).join('') + '</div>';
+  }
+  $('cwall').onclick = function (e) { var b = e.target.closest('.csq'); if (b && !edit) openAt(+b.dataset.i); };
+  function drawGear() {
+    var by = function (fn, order, alpha) {
+      var c = {}; D.items.forEach(function (it) { var k = fn(it); if (k) c[k] = (c[k] || 0) + 1; });
+      var ks = order ? order.filter(function (k) { return c[k]; }) : Object.keys(c).sort(alpha ? undefined : function (a, b) { return c[b] - c[a]; });
+      return ks.slice(0, 6).map(function (k) { return [k, c[k]]; });
+    };
+    var num = function (re, x) { var m = re.exec(x || ''); return m ? parseFloat(m[1]) : null; };
+    var AP = ['f/1.2–2', 'f/2.8–4', 'f/5.6–8', 'f/11+'], IS = ['≤200', '400–800', '1600–3200', '6400+'], FL = ['≤24mm', '25–40mm', '41–85mm', '86mm+'];
+    var blocks = [
+      ['Genres', by(function (it) { return it.c; })],
+      ['Cameras', by(function (it) { return (it.cam || '').split(' · ')[0]; })],
+      ['Lenses', by(function (it) { return (it.cam || '').split(' · ')[1]; })],
+      ['Aperture', by(function (it) { var v = num(/f\/([\d.]+)/, it.set); return v == null ? '' : v <= 2.2 ? AP[0] : v <= 4.5 ? AP[1] : v <= 9 ? AP[2] : AP[3]; }, AP)],
+      ['ISO', by(function (it) { var v = num(/ISO\s*(\d+)/i, it.set); return v == null ? '' : v <= 200 ? IS[0] : v <= 800 ? IS[1] : v <= 3200 ? IS[2] : IS[3]; }, IS)],
+      ['Focal length', by(function (it) { var v = num(/(\d+)\s*mm/, it.set); return v == null ? '' : v <= 24 ? FL[0] : v <= 40 ? FL[1] : v <= 85 ? FL[2] : FL[3]; }, FL)],
+      ['Year', by(function (it) { var t = ts(it); return isNaN(t) ? '' : String(Math.floor(t / 12)); }, null, true)]
+    ].filter(function (b) { return b[1].length; });
+    $('gstats').innerHTML = blocks.map(function (b) {
+      var mx = Math.max.apply(null, b[1].map(function (e) { return e[1]; }));
+      return '<div><div class="gh">' + b[0] + '</div>' + b[1].map(function (e) { return '<div class="gb"><span>' + esc(e[0]) + '</span><u><i style="--w:' + Math.round(e[1] / mx * 100) + '%"></i></u><b>' + e[1] + '</b></div>'; }).join('') + '</div>';
+    }).join('') || '<p style="color:var(--mute)">Stats appear once your photos have details (EXIF fills these in on upload).</p>';
+    var places = {}, ser = {}; D.items.forEach(function (it) { if (it.loc) places[it.loc] = 1; if (it.s) ser[it.s] = 1; });
+    $('gtot').innerHTML = [[D.items.length, 'Photographs'], [Object.keys(places).length, 'Places'], [Object.keys(ser).length, 'Series']].filter(function (x) { return x[0]; })
+      .map(function (x) { return '<div><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join('');
+  }
   function init(d) { D = d; D.t = D.t || {}; D.items = D.items || []; D.cats = D.cats || DEFAULT_CATS.slice(); applyTexts(); mailfix(); hero(); buildFilters(); draw(); openHash(); }
 
   /* ---------- Supabase ---------- */
@@ -662,7 +762,7 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
     if (edit && dirty) say('Unsaved changes');
   }
   function setEdit(v) {
-    edit = v; if (v && view === 'map') setView('grid'); document.body.classList.toggle('editing', v);
+    edit = v; if (v && view !== 'grid') setView('grid'); document.body.classList.toggle('editing', v);
     document.querySelectorAll('[data-k]').forEach(function (e) { if (v) e.setAttribute('contenteditable', 'true'); else e.removeAttribute('contenteditable'); });
     buildFilters(); bar();
   }
