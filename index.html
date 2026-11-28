@@ -89,6 +89,7 @@ body.editing .tile{cursor:default}
 .edin input[type=password]{letter-spacing:.1em}
 .filters button.x{font-size:11px;opacity:.7;border:1px dashed var(--mute);border-radius:12px;padding:1px 9px}
 .tile video.ph{display:block;object-fit:cover;width:100%}
+.hv{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
 </style>
 </head>
 <body>
@@ -187,7 +188,17 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
     document.querySelectorAll('[data-k]').forEach(function (e) { var v = D.t[e.dataset.k]; if (v != null && v !== '') e.textContent = v; });
   }
   function hero() {
-    $('top').style.background = D.hero ? 'linear-gradient(rgba(0,0,0,.3),rgba(0,0,0,.3)),' + bg({ img: D.hero }) : '';
+    var h = $('top'), old = h.querySelector('video.hv');
+    if (old) old.remove();
+    h.style.background = D.hero ? 'linear-gradient(rgba(0,0,0,.3),rgba(0,0,0,.3)),' + bg({ img: D.hero }) : '';
+    if (D.heroVid) {
+      var v = document.createElement('video');
+      v.className = 'hv'; v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = !reduce; v.preload = 'auto';
+      if (D.hero) v.poster = D.hero;
+      v.src = D.heroVid;
+      h.insertBefore(v, h.firstChild);
+      if (!reduce) v.play().catch(function () {});
+    }
   }
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   var vio = new IntersectionObserver(function (es) {
@@ -434,9 +445,25 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
   document.addEventListener('input', function (e) { var k = edit && e.target.dataset && e.target.dataset.k; if (k) { D.t[k] = e.target.innerText; mark(); } });
   document.addEventListener('click', function (e) { if (edit && e.target.closest('a[data-k]')) e.preventDefault(); }, true);
 
+  function pickHeroVideo() {
+    var f = document.createElement('input'); f.type = 'file'; f.accept = 'video/mp4,video/webm';
+    f.onchange = async function () {
+      var file = f.files[0]; if (!file) return;
+      if (file.size > 40 * 1024 * 1024) { say('That video is over 40 MB. Please compress it.'); return; }
+      say('Uploading video…');
+      try {
+        var path = 'hero-' + Date.now().toString(36) + (/webm$/i.test(file.name) ? '.webm' : '.mp4');
+        var up = await sb.storage.from('photos').upload(path, file, { contentType: file.type || 'video/mp4', cacheControl: '31536000' });
+        if (up.error) throw up.error;
+        D.heroVid = sb.storage.from('photos').getPublicUrl(path).data.publicUrl;
+        mark(); hero(); bar();
+      } catch (err) { say('Failed: ' + err.message); }
+    };
+    f.click();
+  }
   var B = document.createElement('div'); B.className = 'bar'; B.style.display = 'none'; document.body.appendChild(B);
   function bar() {
-    B.innerHTML = (edit ? '<button data-b="add">+ Add photos</button><button data-b="hero">Hero image</button><button class="pri" data-b="save">Save to GitHub</button><button data-b="exit">Done</button>'
+    B.innerHTML = (edit ? '<button data-b="add">+ Add photos</button><button data-b="hero">Hero image</button><button data-b="hvid">Hero video</button>' + (D.heroVid ? '<button data-b="hvrm">Remove video</button>' : '') + '<button class="pri" data-b="save">Save to GitHub</button><button data-b="exit">Done</button>'
       : '<button data-b="on">✎ Edit site' + (dirty ? ' · unsaved' : '') + '</button>') + '<button data-b="out">Sign out</button><span id="st"></span>';
     if (edit && dirty) say('Unsaved changes');
   }
@@ -450,6 +477,8 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
     if (k === 'on') setEdit(true); else if (k === 'exit') setEdit(false);
     else if (k === 'add') pick(true, function (r, f) { D.items.push({ t: f.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '), c: flt === 'all' ? (D.cats[0] || 'landscape') : flt, img: r.url, r: r.ar }); mark(); buildFilters(); draw(); });
     else if (k === 'hero') pick(false, function (r) { D.hero = r.url; mark(); hero(); });
+    else if (k === 'hvid') pickHeroVideo();
+    else if (k === 'hvrm') { delete D.heroVid; mark(); hero(); bar(); }
     else if (k === 'save') save();
     else if (k === 'out') { dirty = false; sb.auth.signOut().then(function () { location.reload(); }); }
   };
