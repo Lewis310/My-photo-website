@@ -88,6 +88,7 @@ body.editing .tile{cursor:default}
 .edin a{text-decoration:underline}
 .edin input[type=password]{letter-spacing:.1em}
 .filters button.x{font-size:11px;opacity:.7;border:1px dashed var(--mute);border-radius:12px;padding:1px 9px}
+.tile video.ph{display:block;object-fit:cover;width:100%}
 </style>
 </head>
 <body>
@@ -148,8 +149,8 @@ Sydney, NSW</p>
 </div>
 <script>
 /* Paste your Supabase project values here (Project Settings > API). The anon key is safe to publish; never use the service_role key. */
-window.SUPABASE_URL = 'https://bbxfaskfjbewhzjtbjta.supabase.co/';
-window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
+window.SUPABASE_URL = 'YOUR_SUPABASE_URL';
+window.SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
@@ -188,6 +189,13 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
   function hero() {
     $('top').style.background = D.hero ? 'linear-gradient(rgba(0,0,0,.3),rgba(0,0,0,.3)),' + bg({ img: D.hero }) : '';
   }
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var vio = new IntersectionObserver(function (es) {
+    es.forEach(function (x) {
+      var v = x.target;
+      if (x.isIntersecting) { if (!v.src) v.src = v.dataset.src; v.play().catch(function () {}); } else v.pause();
+    });
+  }, { threshold: .3 });
   function draw() {
     g.innerHTML = '';
     D.items.forEach(function (it, i) {
@@ -195,14 +203,17 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
       f.className = 'tile rev in'; f.dataset.c = it.c || ''; f.dataset.i = i;
       var ratio = esc(it.r || '3/2');
       f.innerHTML = (it.img
-        ? '<img class="ph" loading="lazy" decoding="async" src="' + esc(url(it.img)) + '" alt="' + esc(it.alt || it.t) + '" style="aspect-ratio:' + ratio + '">'
+        ? (it.vid
+          ? '<video class="ph" muted loop playsinline preload="none" data-src="' + esc(it.vid) + '" poster="' + esc(url(it.img)) + '" style="aspect-ratio:' + ratio + '"></video>'
+          : '<img class="ph" loading="lazy" decoding="async" src="' + esc(url(it.img)) + '" alt="' + esc(it.alt || it.t) + '" style="aspect-ratio:' + ratio + '">')
         : '<div class="ph" role="img" aria-label="' + esc(it.t) + '" style="aspect-ratio:' + ratio + ';background:' + bg(it) + '"></div>')
         + '<figcaption>' + esc(it.t) + (it.c ? ' — ' + esc(it.c) : '') + '</figcaption>'
-        + '<div class="ctl"><button data-a="img">Photo</button><button data-a="ed">Details</button><button data-a="l">←</button><button data-a="r">→</button><button data-a="del">Delete</button></div>';
+        + '<div class="ctl"><button data-a="img">Photo</button><button data-a="ed">Details</button><button data-a="mo">Motion</button><button data-a="l">←</button><button data-a="r">→</button><button data-a="del">Delete</button></div>';
       var im = f.querySelector('img');
       if (im && !it.r) im.onload = function () { it.r = im.naturalWidth + '/' + im.naturalHeight; im.style.aspectRatio = it.r; };
       f.classList.toggle('hide', flt !== 'all' && it.c !== flt);
       g.appendChild(f);
+      var vd = f.querySelector('video'); if (vd && !reduce) vio.observe(vd);
     });
   }
   function buildFilters() {
@@ -232,20 +243,21 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
     vis = visible(); if (!vis.length) return;
     cur = (n + vis.length) % vis.length;
     var it = D.items[+vis[cur].dataset.i], p = $('lbph'), a = String(it.r || '3/2').split('/');
-    p.style.background = bg(it); p.style.setProperty('--ar', it.r || '3/2'); p.style.setProperty('--r', a[0] / (a[1] || 1));
+    p.style.background = bg(it);
+    p.innerHTML = it.vid ? '<video src="' + esc(it.vid) + '" poster="' + esc(url(it.img)) + '" autoplay muted loop playsinline ' + (reduce ? 'controls ' : '') + 'style="width:100%;height:100%;object-fit:cover;display:block"></video>' : ''; p.style.setProperty('--ar', it.r || '3/2'); p.style.setProperty('--r', a[0] / (a[1] || 1));
     var rows = [['Location', it.loc], ['Date', it.date], ['Camera', it.cam], ['Settings', it.set]].filter(function (r) { return r[1]; })
       .map(function (r) { return '<dt>' + r[0] + '</dt><dd>' + esc(r[1]) + '</dd>'; }).join('');
-    $('lbinfo').innerHTML = (it.c ? '<div class="cat">' + esc(it.c) + '</div>' : '') + '<h3>' + esc(it.t) + '</h3>'
+    $('lbinfo').innerHTML = (it.c ? '<div class="cat">' + esc(it.c) + '</div>' : '') + '<h3>' + esc(it.t) + '</h3>' + (it.vid && it.vai ? '<div class="cat" style="margin:-10px 0 16px">Animated with AI</div>' : '')
       + (rows ? '<dl>' + rows + '</dl>' : '') + (it.story ? '<p>' + esc(it.story).replace(/\n/g, '<br>') + '</p>' : '');
   }
   lb.onclick = function (e) {
     if (e.target.classList.contains('nx')) show(cur + 1);
     else if (e.target.classList.contains('pv')) show(cur - 1);
-    else if (!e.target.closest('.lbin')) lb.classList.remove('open');
+    else if (!e.target.closest('.lbin')) { lb.classList.remove('open'); $('lbph').innerHTML = ''; }
   };
   document.addEventListener('keydown', function (e) {
     if (!lb.classList.contains('open')) return;
-    if (e.key === 'Escape') lb.classList.remove('open');
+    if (e.key === 'Escape') { lb.classList.remove('open'); $('lbph').innerHTML = ''; }
     if (e.key === 'ArrowRight') show(cur + 1);
     if (e.key === 'ArrowLeft') show(cur - 1);
   });
@@ -341,10 +353,73 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
     $('a_err').textContent = ''; lg.classList.add('open');
   }
 
+  /* ---------- motion (video clips) ---------- */
+  var DEF_PROMPT = 'Subtle natural motion, gentle camera drift, soft ambient movement, keep the scene faithful to the original photograph';
+  var mo = modal('<h4 class="serif" style="font-size:30px;font-weight:300">Motion</h4>'
+    + '<div id="mo_prev" style="margin-top:12px"></div>'
+    + '<label>Motion prompt<textarea id="mo_p" rows="3"></textarea></label>'
+    + '<label>Length<select id="mo_d"><option value="5">5 seconds</option><option value="10">10 seconds</option></select></label>'
+    + '<p id="mo_s" style="font-size:13px;color:var(--mute);margin-top:10px"></p>'
+    + '<div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button class="b" data-x="gen">Generate with Higgsfield</button><button class="b" data-x="up">Upload my own clip</button><button class="b" data-x="rm">Remove clip</button><button class="b" data-x="no">Close</button></div>');
+  var mi = -1, busy = false;
+  function moPrev() {
+    var it = D.items[mi];
+    $('mo_prev').innerHTML = it.vid ? '<video src="' + esc(it.vid) + '" muted loop playsinline autoplay controls style="width:100%;max-height:260px;background:#000"></video>'
+      : '<p style="font-size:13px;color:var(--mute)">No clip yet. Generate one, or upload your own.</p>';
+  }
+  function openMo(i) { mi = i; $('mo_p').value = D.items[i].vp || DEF_PROMPT; $('mo_s').textContent = ''; moPrev(); mo.classList.add('open'); }
+  function pickVideo(it) {
+    var f = document.createElement('input'); f.type = 'file'; f.accept = 'video/mp4,video/webm';
+    f.onchange = async function () {
+      var file = f.files[0]; if (!file) return;
+      if (file.size > 40 * 1024 * 1024) { $('mo_s').textContent = 'That clip is over 40 MB. Please compress it.'; return; }
+      busy = true; $('mo_s').textContent = 'Uploading…';
+      try {
+        var path = 'clip-' + Date.now().toString(36) + (/webm$/i.test(file.name) ? '.webm' : '.mp4');
+        var up = await sb.storage.from('photos').upload(path, file, { contentType: file.type || 'video/mp4', cacheControl: '31536000' });
+        if (up.error) throw up.error;
+        it.vid = sb.storage.from('photos').getPublicUrl(path).data.publicUrl; it.vai = false;
+        mark(); draw(); moPrev(); $('mo_s').textContent = 'Uploaded. Click Save in the bar to publish it.';
+      } catch (err) { $('mo_s').textContent = 'Failed: ' + err.message; }
+      busy = false;
+    };
+    f.click();
+  }
+  mo.onclick = async function (e) {
+    var x = e.target.dataset.x, it = D.items[mi];
+    if (e.target === mo || x === 'no') { if (!busy) mo.classList.remove('open'); return; }
+    if (busy || !x) return;
+    if (x === 'rm') { delete it.vid; delete it.vai; mark(); draw(); moPrev(); return; }
+    if (x === 'up') { pickVideo(it); return; }
+    if (x === 'gen') {
+      if (!it.img) { $('mo_s').textContent = 'Add the photo first (use Photo), then animate it.'; return; }
+      busy = true; $('mo_s').textContent = 'Starting…';
+      try {
+        it.vp = $('mo_p').value.trim();
+        var s = await sb.functions.invoke('animate', { body: { action: 'start', image_url: it.img, prompt: it.vp, duration: +$('mo_d').value } });
+        if (s.error) throw new Error(s.error.message);
+        if (!s.data || !s.data.ok) throw new Error((s.data && s.data.error) || 'Could not start');
+        var id = s.data.request_id, t0 = Date.now();
+        while (true) {
+          if (Date.now() - t0 > 600000) throw new Error('Timed out. Please try again.');
+          await new Promise(function (r) { setTimeout(r, 6000); });
+          $('mo_s').textContent = 'Generating… ' + Math.round((Date.now() - t0) / 1000) + 's';
+          var q = await sb.functions.invoke('animate', { body: { action: 'status', request_id: id } });
+          if (q.error) throw new Error(q.error.message);
+          if (!q.data || !q.data.ok) throw new Error((q.data && q.data.error) || 'Status check failed');
+          if (q.data.status === 'completed') { it.vid = q.data.url; it.vai = true; break; }
+        }
+        mark(); draw(); moPrev(); $('mo_s').textContent = 'Done. Click Save in the bar to publish it.';
+      } catch (err) { $('mo_s').textContent = 'Failed: ' + err.message; }
+      busy = false;
+    }
+  };
+
   function act(b, i) {
     var a = b.dataset.a, it = D.items[i], j;
-    if (a === 'img') pick(false, function (r) { it.img = r.url; it.r = r.ar; mark(); draw(); });
+    if (a === 'img') pick(false, function (r) { it.img = r.url; it.r = r.ar; delete it.vid; delete it.vai; mark(); draw(); });
     else if (a === 'ed') openEd(i);
+    else if (a === 'mo') openMo(i);
     else if (a === 'l' || a === 'r') { j = a === 'l' ? i - 1 : i + 1; if (j < 0 || j >= D.items.length) return; D.items[i] = D.items[j]; D.items[j] = it; mark(); draw(); }
     else if (a === 'del') {
       if (b.dataset.s) { D.items.splice(i, 1); mark(); buildFilters(); draw(); }
