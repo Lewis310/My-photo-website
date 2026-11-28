@@ -182,11 +182,11 @@ header{background:var(--bg)!important;color:var(--fg)!important;text-shadow:none
 header nav a.on{color:var(--ac)}
 #series .label{padding-top:8vh}
 @media(min-width:801px){
-:root{--sw:250px}
+:root{--sw:300px}
 body{padding-left:var(--sw)}
-header{top:0;right:auto;bottom:0;width:var(--sw);flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:2.4rem;padding:34px 28px;border-right:1px solid var(--line);overflow-y:auto}
+header{top:0;right:auto;bottom:0;width:var(--sw);flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:2.8rem;padding:46px 38px;border-right:1px solid var(--line);overflow-y:auto}
 header .logo{font-size:16px!important}
-header nav{flex-direction:column;align-items:flex-start;gap:.9rem;width:100%}
+header nav{flex-direction:column;align-items:flex-start;gap:1.1rem;width:100%}
 .dd{width:100%}
 .ddm{position:static;display:flex;min-width:0;gap:.55rem;padding:.7rem 0 .3rem 14px;border:0;background:none}
 .ddm a{font-size:11px;opacity:.7}.ddm a.on{opacity:1}
@@ -197,11 +197,50 @@ header nav{flex-direction:column;align-items:flex-start;gap:.9rem;width:100%}
 .cl img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .9s cubic-bezier(.2,.7,.2,1)}.cl:hover img{transform:scale(1.05)}
 @media(max-width:1300px){#collage{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:800px){#collage{grid-template-columns:repeat(2,1fr)}}
+
+/* ---- sidebar brand icon ---- */
+.brand{display:flex;align-items:center;gap:12px}
+.mark{display:block;width:28px;height:28px;color:var(--ac)}
+.mark svg{display:block;width:100%;height:100%;transition:transform 1.4s cubic-bezier(.2,.7,.2,1)}
+.mark:hover svg{transform:rotate(120deg)}
+@media(min-width:801px){.brand{flex-direction:column;align-items:flex-start;gap:20px}.mark{width:52px;height:52px}header .logo{font-size:17px!important}}
+/* ---- home: rotating line of photos ---- */
+#showcase{display:none;grid-template-columns:minmax(280px,34%) 1fr;min-height:100vh;align-items:center}
+body[data-pg=home] #showcase{display:grid}
+body[data-pg=home] #showcase.none{display:none}
+.sc-text{padding:0 2vw 0 4vw;position:relative;z-index:2}
+.sc-sub{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--mute);margin-bottom:1.2rem}
+.sc-title{font:200 clamp(26px,3vw,48px)/1.12 Inter,system-ui,sans-serif;text-transform:uppercase;letter-spacing:.06em}
+.sc-cap{margin-top:clamp(28px,7vh,72px);padding-top:22px;border-top:1px solid var(--line);min-height:150px}
+.sc-n{font-size:11px;letter-spacing:.28em;color:var(--ac)}
+.sc-cap h3{font:300 clamp(28px,3vw,44px)/1.1 "Cormorant Garamond",Georgia,serif;margin:.5rem 0 .4rem}
+.sc-cap p{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+.sc-cap.sw>*{animation:scin .7s both}.sc-cap.sw h3{animation-delay:.06s}.sc-cap.sw p{animation-delay:.12s}
+@keyframes scin{from{opacity:0;transform:translateY(10px)}}
+.sc-ctl{display:flex;align-items:center;gap:14px;margin:6px 0 10px;max-width:340px}
+.sc-ctl button{flex:none;background:none;border:1px solid var(--line);color:var(--fg);border-radius:50%;width:38px;height:38px;cursor:pointer;font-size:16px}
+.sc-ctl button:hover{color:var(--ac);border-color:var(--ac)}
+.sc-bar{flex:1;height:1px;background:var(--line);position:relative;overflow:hidden}
+.sc-bar i{position:absolute;inset:0;background:var(--ac);transform-origin:0 50%;transform:scaleX(0)}
+.rg{position:relative;height:100vh;min-height:520px;overflow:hidden;cursor:grab;touch-action:pan-y;outline:none;user-select:none;-webkit-user-select:none}
+.rg.drag{cursor:grabbing}
+.rg:focus-visible{outline:1px solid var(--ac);outline-offset:-6px}
+.rg-glow{position:absolute;inset:0;transition:background 1s;pointer-events:none}
+.rg-persp{position:absolute;inset:0;perspective:1700px;perspective-origin:50% 50%;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 16%,#000 84%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 16%,#000 84%,transparent 100%)}
+.rg-track{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;will-change:transform}
+.rcard{position:absolute;left:0;top:0;padding:0;border:0;background:var(--card);cursor:inherit;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 30px 70px -30px rgba(0,0,0,.65);will-change:transform,opacity}
+:root[data-theme="light"] .rcard{box-shadow:0 30px 60px -30px rgba(0,0,0,.35)}
+.rg-hint{position:absolute;left:0;right:0;bottom:4vh;text-align:center;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--mute);pointer-events:none;transition:opacity .8s}
+.rg.used .rg-hint{opacity:0}
+#colhead{display:none;padding:10vh 4vw 3vh;margin:0}
+body[data-pg=home] #colhead{display:block}
+@media(max-width:800px){#showcase{grid-template-columns:1fr;min-height:0;align-items:start}.sc-text{display:contents}.sc-sub,.sc-title,.sc-cap,.sc-ctl,.sc-text .btn{margin-left:4vw;margin-right:4vw}.sc-sub{order:1;margin-top:22px;margin-bottom:.6rem}.sc-title{order:2;font-size:24px}.rg{order:3;height:58vh;min-height:360px;margin-top:10px}.sc-cap{order:4;min-height:0;margin-top:6px}.sc-ctl{order:5}.sc-text .btn{order:6;justify-self:start;margin-bottom:6vh}.rg-hint{bottom:2vh}}
+@media(prefers-reduced-motion:reduce){.mark svg,.rg-glow{transition:none}.sc-cap.sw>*{animation:none}}
 </style>
 </head>
 <body data-pg="home">
 <header>
-  <a href="#top" class="logo serif" data-k="logo">Kennie</a>
+  <div class="brand"><a href="#top" class="mark" aria-label="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="14.31" y1="8" x2="20.05" y2="17.94"/><line x1="9.69" y1="8" x2="21.17" y2="8"/><line x1="7.38" y1="12" x2="13.12" y2="2.06"/><line x1="9.69" y1="16" x2="3.95" y2="6.06"/><line x1="14.31" y1="16" x2="2.83" y2="16"/><line x1="16.62" y1="12" x2="10.88" y2="21.94"/></svg></a><a href="#top" class="logo serif" data-k="logo">Kennie</a></div>
   <nav><div class="dd"><a href="#photography">Photography</a><div class="ddm" id="ddm"></div></div><a href="#map">Map</a><a href="#colour">Colour</a><a href="#gear">Gear</a><a href="#about">About</a><a href="#contact">Contact</a></nav><button class="mb" id="mb">Menu</button>
 </header>
 
@@ -212,6 +251,25 @@ header nav{flex-direction:column;align-items:flex-start;gap:.9rem;width:100%}
   </div>
 </div>
 
+<div id="showcase" aria-label="Featured photographs">
+  <div class="sc-text">
+    <p class="sc-sub" data-k="heroSub">Photography · Sydney, Australia</p>
+    <h1 class="sc-title" data-k="heroTitle">Light, patience &amp; quiet places.</h1>
+    <div class="sc-cap" id="rgcap" aria-live="polite">
+      <div class="sc-n" id="rgcount"></div>
+      <h3 id="rgtitle"></h3>
+      <p id="rgmeta"></p>
+    </div>
+    <div class="sc-ctl"><button id="rgprev" aria-label="Previous photo">←</button><span class="sc-bar"><i id="rgbar"></i></span><button id="rgnext" aria-label="Next photo">→</button></div>
+    <a href="#work" class="btn">View portfolio</a>
+  </div>
+  <div class="rg" id="rg" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Rotating line of photographs. Swipe, drag or use the arrow keys.">
+    <div class="rg-glow" id="rgglow"></div>
+    <div class="rg-persp"><div class="rg-track" id="rgtrack"></div></div>
+    <div class="rg-hint">← swipe or drag →</div>
+  </div>
+</div>
+<div class="label" id="colhead">All photographs</div>
 <div id="collage" aria-label="Photo collage"></div>
 
 <div class="marquee serif" aria-hidden="true"><span>Landscape — Street — Portrait — Architecture — Night — Landscape — Street — Portrait — Architecture — Night — Landscape — Street — Portrait — Architecture — Night — Landscape — Street — Portrait — Architecture — Night —&nbsp;</span></div>
@@ -350,7 +408,7 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
       g.appendChild(f);
       var vd = f.querySelector('video'); if (vd && !reduce) vio.observe(vd);
     });
-    layout(); drawMap(); drawSeries(); buildScrub(); drawGear(); buildNav(); if (sfl) setCut(Infinity); if (pg === 'home') drawCollage();
+    layout(); drawMap(); drawSeries(); buildScrub(); drawGear(); buildNav(); if (sfl) setCut(Infinity); if (pg === 'home') { drawCollage(); buildRing(); }
   }
   function buildFilters() {
     D.items.forEach(function (it) { if (it.c && D.cats.indexOf(it.c) < 0) D.cats.push(it.c); });
@@ -636,7 +694,7 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
     var lab = document.querySelector('#work .label'); if (lab) lab.textContent = name || (v === 'map' ? 'Map' : v === 'color' ? 'Colour' : 'Portfolio');
     if (p === 'work') setView(v);
     setCut(Infinity);
-    heroStop(); if (p === 'home') drawCollage();
+    heroStop(); if (p === 'home') { drawCollage(); buildRing(); }
     openHash();
   }
   window.addEventListener('hashchange', route);
@@ -662,6 +720,131 @@ window.SUPABASE_KEY = 'sb_publishable_RCFVxAFOw2mOZr6dxF9e1A_0ZZxKnNx';
   }
   window.addEventListener('resize', fitCollage);
   $('collage').onclick = function (e) { var b = e.target.closest('.cl'); if (b && !edit) openAt(+b.dataset.i); };
+
+  /* ---------- home: rotating line of photos ---------- */
+  /* Photos sit side by side on a ring seen from outside. Drag/swipe turns it, and it also glides to the next photo on its own. */
+  var RG = { n: 0, L: 0, idx: [], ang: [], el: [], R: 0, H: 0, rot: 0, goal: 0, pos: 0, shown: -1, drag: null, vel: 0, t0: 0, last: 0, raf: 0, sig: '', wt: 0, first: true, bar: $('rgbar') },
+    DRIFT = 55, RAD = 180 / Math.PI, rgSt = $('rg'), rgTr = $('rgtrack');
+  function rgMod(a, n) { return ((a % n) + n) % n; }
+  function rgAngle(p) { return -(RG.ang[rgMod(p, RG.n)] + 360 * Math.floor(p / RG.n)); }
+  function buildRing() {
+    var box = $('showcase'), base = D.items.map(function (it, i) { return i; }).slice(0, 20);
+    box.classList.toggle('none', !base.length);
+    var sh = rgSt.clientHeight, sw = rgSt.clientWidth;
+    if (!sh || !base.length) return;
+    var list = base.slice(); while (list.length < 6) list = list.concat(base);
+    var H = Math.round(Math.min(sh * .74, 680)), gap = 26;
+    var W = list.map(function (i) {
+      var a = String(D.items[i].r || '3/2').split('/'), r = (+a[0]) / (+a[1] || 1);
+      r = Math.max(.6, Math.min(1.7, r || 1.5)); return Math.round(Math.min(H * r, sw * .8));
+    });
+    var sig = [H, sw, W.join('.'), list.map(function (i) { var it = D.items[i]; return it.th || it.img || it.g || ''; }).join('|')].join('#');
+    if (sig === RG.sig) return; RG.sig = sig;
+    var lo = 1, hi = 1e6, R = 0, k, tot = function (r) { var s = 0; W.forEach(function (w) { s += 2 * Math.atan((w + gap) / (2 * r)); }); return s; };
+    for (k = 0; k < 50; k++) { R = (lo + hi) / 2; if (tot(R) > 2 * Math.PI) lo = R; else hi = R; }
+    var cum = 0;
+    RG.ang = W.map(function (w) { var sp = 2 * Math.atan((w + gap) / (2 * R)), c = (cum + sp / 2) * RAD; cum += sp; return c; });
+    RG.n = list.length; RG.L = base.length; RG.idx = list; RG.R = R; RG.H = H;
+    rgTr.innerHTML = list.map(function (i, j) {
+      var it = D.items[i];
+      return '<button class="rcard" tabindex="-1" data-r="' + j + '" data-i="' + i + '" aria-label="' + esc(it.t || 'Photo') + '" style="width:' + W[j] + 'px;height:' + H + 'px;margin:' + (-H / 2) + 'px 0 0 ' + (-W[j] / 2) + 'px;background:' + esc(bg(it.img ? { img: it.th || it.img } : it)) + '"></button>';
+    }).join('');
+    RG.el = [].slice.call(rgTr.children);
+    RG.pos = rgMod(RG.pos, RG.n); RG.goal = rgAngle(RG.pos);
+    RG.rot = RG.goal + (RG.first && !reduce ? 75 : 0); RG.first = false;
+    RG.shown = -1; RG.t0 = performance.now() + 1200;
+    rgPaint();
+  }
+  function rgCaption(j) {
+    RG.shown = j; var it = D.items[RG.idx[j]], k = j % RG.L, c = $('rgcap');
+    $('rgcount').textContent = String(k + 1).padStart(2, '0') + ' / ' + String(RG.L).padStart(2, '0');
+    $('rgtitle').textContent = it.t || 'Untitled';
+    $('rgmeta').textContent = [it.c, it.loc].filter(Boolean).join(' · ');
+    c.classList.remove('sw'); void c.offsetWidth; c.classList.add('sw');
+    $('rgglow').style.background = it.dc ? 'radial-gradient(ellipse at 50% 55%,color-mix(in srgb,' + it.dc + ' 34%,transparent),transparent 68%)' : '';
+  }
+  function rgPaint() {
+    if (!RG.n) return;
+    rgTr.style.transform = 'translateZ(' + (-RG.R).toFixed(1) + 'px) rotateY(' + RG.rot.toFixed(3) + 'deg)';
+    var best = 0, bd = 1e9, j, ad, op, pop, el;
+    for (j = 0; j < RG.n; j++) {
+      ad = Math.abs(rgMod(RG.ang[j] + RG.rot + 180, 360) - 180);
+      if (ad < bd) { bd = ad; best = j; }
+      op = ad < 40 ? 1 : ad > 100 ? 0 : 1 - (ad - 40) / 60;
+      pop = ad < 26 ? 90 * Math.pow(1 - ad / 26, 2) : 0;
+      el = RG.el[j];
+      el.style.transform = 'rotateY(' + RG.ang[j].toFixed(3) + 'deg) translateZ(' + (RG.R + pop).toFixed(1) + 'px)';
+      el.style.filter = ad > 14 ? 'blur(' + Math.min(9, (ad - 14) * .16).toFixed(1) + 'px)' : '';
+      el.style.opacity = op.toFixed(3); el.style.pointerEvents = op < .15 ? 'none' : '';
+    }
+    if (best !== RG.shown) rgCaption(best);
+  }
+  function rgGo(p, user) { RG.pos = p; RG.goal = rgAngle(p); RG.t0 = performance.now() + (user ? 2500 : 0); }
+  function rgNear(proj) {
+    var n = RG.n, c0 = Math.round(-proj / 360), best = 0, bd = 1e9, c, i, d;
+    for (c = c0 - 1; c <= c0 + 1; c++) for (i = 0; i < n; i++) { d = Math.abs(-(RG.ang[i] + 360 * c) - proj); if (d < bd) { bd = d; best = c * n + i; } }
+    return best;
+  }
+  function rgSnap(proj) { rgGo(rgNear(proj), true); }
+  function rgTick(t) {
+    RG.raf = requestAnimationFrame(rgTick);
+    var dt = Math.min(64, t - (RG.last || t)); RG.last = t;
+    if (!RG.drag) {
+      if (document.hidden || lb.classList.contains('open')) RG.t0 = Math.max(RG.t0, t + 1500);
+      var d = RG.goal - RG.rot;
+      if (Math.abs(d) > .02) RG.rot += d * (1 - Math.exp(-dt / 420));
+      else if (!reduce && t >= RG.t0) { RG.rot -= DRIFT / RG.R * RAD * dt / 1000; RG.goal = RG.rot; }
+      else RG.rot = RG.goal;
+    }
+    rgPaint();
+    RG.bar.style.transform = 'scaleX(' + Math.max(.02, rgMod(-RG.rot, 360) / 360).toFixed(3) + ')';
+  }
+  function rgStart() { if (!RG.raf && RG.n) { RG.last = 0; RG.raf = requestAnimationFrame(rgTick); } }
+  function rgStop() { cancelAnimationFrame(RG.raf); RG.raf = 0; }
+  function rgTap(t) {
+    var c = t && t.closest && t.closest('.rcard'); if (!c || edit) return;
+    var j = +c.dataset.r;
+    if (j === RG.shown) openAt(+c.dataset.i);
+    else { var p0 = rgNear(RG.rot); rgGo(p0 + Math.round(rgMod(j - rgMod(p0, RG.n) + RG.n / 2, RG.n) - RG.n / 2), true); }
+  }
+  rgSt.addEventListener('pointerdown', function (e) {
+    if (e.button > 0 || !RG.n) return;
+    RG.drag = { x: e.clientX, id: e.pointerId, rot0: RG.rot, moved: false, tgt: e.target, lx: e.clientX, lt: e.timeStamp }; RG.vel = 0;
+  });
+  rgSt.addEventListener('pointermove', function (e) {
+    var d = RG.drag; if (!d || e.pointerId !== d.id) return;
+    var dx = e.clientX - d.x;
+    if (!d.moved && Math.abs(dx) > 6) { d.moved = true; rgSt.classList.add('drag', 'used'); try { rgSt.setPointerCapture(e.pointerId); } catch (x) {} }
+    if (!d.moved) return;
+    RG.rot = d.rot0 + dx / RG.R * RAD; RG.goal = RG.rot;
+    RG.vel = .75 * RG.vel + .25 * ((e.clientX - d.lx) / RG.R * RAD) / Math.max(1, e.timeStamp - d.lt);
+    d.lx = e.clientX; d.lt = e.timeStamp; RG.t0 = performance.now() + 3000;
+  });
+  function rgEnd(e) {
+    var d = RG.drag; if (!d || e.pointerId !== d.id) return;
+    RG.drag = null; rgSt.classList.remove('drag');
+    if (!d.moved) { if (e.type === 'pointerup') rgTap(d.tgt); return; }
+    if (e.timeStamp - d.lt > 90) RG.vel = 0;
+    rgSnap(RG.rot + Math.max(-150, Math.min(150, RG.vel * 380)));
+  }
+  rgSt.addEventListener('pointerup', rgEnd); rgSt.addEventListener('pointercancel', rgEnd);
+  rgSt.addEventListener('wheel', function (e) {
+    if (!RG.n || Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+    e.preventDefault(); rgSt.classList.add('used');
+    RG.rot -= e.deltaX / RG.R * RAD; RG.goal = RG.rot; RG.t0 = performance.now() + 3000;
+    clearTimeout(RG.wt); RG.wt = setTimeout(function () { rgSnap(RG.rot); }, 140);
+  }, { passive: false });
+  rgSt.addEventListener('click', function (e) { if (e.detail === 0) rgTap(e.target); });
+  rgSt.addEventListener('keydown', function (e) {
+    if (!RG.n) return;
+    if (e.key === 'ArrowRight') { e.preventDefault(); rgGo(rgNear(RG.rot) + 1, true); rgSt.classList.add('used'); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); rgGo(rgNear(RG.rot) - 1, true); rgSt.classList.add('used'); }
+    else if ((e.key === 'Enter' || e.key === ' ') && e.target === rgSt && RG.shown >= 0) { e.preventDefault(); openAt(RG.idx[RG.shown]); }
+  });
+  $('rgprev').onclick = function () { if (RG.n) rgGo(rgNear(RG.rot) - 1, true); };
+  $('rgnext').onclick = function () { if (RG.n) rgGo(rgNear(RG.rot) + 1, true); };
+  new IntersectionObserver(function (es) { es.forEach(function (x) { if (x.isIntersecting) { if (D.items.length) buildRing(); rgStart(); } else rgStop(); }); }, { threshold: .05 }).observe(rgSt);
+  var rgRt; window.addEventListener('resize', function () { clearTimeout(rgRt); rgRt = setTimeout(buildRing, 150); });
   function init(d) { D = d; D.t = D.t || {}; D.items = D.items || []; D.cats = D.cats || DEFAULT_CATS.slice(); applyTexts(); mailfix(); hero(); buildFilters(); draw(); route(); }
 
   /* ---------- Supabase ---------- */
